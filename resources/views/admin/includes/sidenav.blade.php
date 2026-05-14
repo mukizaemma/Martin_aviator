@@ -26,7 +26,17 @@
 
             <a class="nav-link" href="{{ route('diningMenu') }}">
                 <div class="sb-nav-link-icon"><i class="fas fa-utensils"></i></div>
-                Dining &amp; gallery
+                Dining page &amp; gallery
+            </a>
+
+            <a class="nav-link" href="{{ route('diningMenu.manage') }}">
+                <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
+                Restaurant menu
+            </a>
+
+            <a class="nav-link" href="{{ route('diningMenu.categories.manage') }}">
+                <div class="sb-nav-link-icon"><i class="fas fa-layer-group"></i></div>
+                Menu categories
             </a>
 
             <a class="nav-link" href="{{route('slides')}}">

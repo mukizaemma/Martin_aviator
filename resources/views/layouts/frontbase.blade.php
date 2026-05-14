@@ -272,6 +272,7 @@
     <script src="{{ asset('assets/js/wow.min.js') }}" defer></script>
     <!-- Custom script -->
     <script src="{{ asset('assets/js/script.js') }}" defer></script>
+    <script src="{{ asset('assets/js/dual-currency.js') }}" defer></script>
     <script src="{{ asset('assets/js/parallax-bg.js') }}" defer></script>
     <script>
         (function () {

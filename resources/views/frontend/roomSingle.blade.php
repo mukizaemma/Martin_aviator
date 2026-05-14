@@ -50,7 +50,7 @@
                 </div>
                 <div class="col-lg-6">
                     <div class="product-details-content mt-35 rmt-55 wow fadeInRight delay-0-2s">
-                        <span class="price mb-30">{!! \App\Support\Currency::formatUsdHover($room->price) !!}</span>
+                        <span class="price mb-30">{!! \App\Support\Currency::formatUsdWithLocal($room->price, $room->price_rwf) !!}</span>
                         <p>
                             {!! $room->description !!}
                         </p>

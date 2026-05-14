@@ -15,7 +15,7 @@
                         <img src="{{ asset('storage/images/rooms/' . $room->image) }}" alt="Room">
                     </div>
                     <div class="content">
-                        <div class="price">{!! \App\Support\Currency::formatUsdHover($room->price) !!} Per Night</div>
+                        <div class="price">{!! \App\Support\Currency::formatUsdWithLocal($room->price, $room->price_rwf) !!} Per Night</div>
                         <h3><a href="{{ route('singleRoom',['slug'=>$room->slug]) }}">{{ $room->roomName }}</a></h3>
                         <ul class="blog-meta">
                             <li>

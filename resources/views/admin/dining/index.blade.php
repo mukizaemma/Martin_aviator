@@ -1,6 +1,6 @@
 @extends('layouts.adminbase')
 
-@section('title', 'Dining')
+@section('title', 'Dining page & gallery')
 
 @section('content')
 <div id="layoutSidenav">
@@ -8,9 +8,19 @@
     <div id="layoutSidenav_content">
         <main class="ma-admin-page">
             <div class="container-fluid px-4 py-3">
-                <div class="ma-page-head mb-4">
-                    <h1 class="ma-page-title">Dining &amp; gallery</h1>
-                    <p class="text-muted mb-0 small">Public <strong>/dining</strong> page and the dining photo strip on <strong>/facilities</strong>.</p>
+                <div class="ma-page-head mb-4 d-flex flex-wrap justify-content-between align-items-start gap-3">
+                    <div>
+                        <h1 class="ma-page-title">Dining page &amp; gallery</h1>
+                        <p class="text-muted mb-0 small">Public <strong>/dining</strong> hero &amp; intro, and the dining photo strip on <strong>/facilities</strong>.</p>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{{ route('diningMenu.manage') }}" class="btn btn-ma-primary btn-sm">
+                            <i class="fas fa-book-open me-1"></i> Menu items
+                        </a>
+                        <a href="{{ route('diningMenu.categories.manage') }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-layer-group me-1"></i> Menu categories
+                        </a>
+                    </div>
                 </div>
 
                 @if (session('success'))
@@ -39,52 +49,6 @@
                                 </div>
                             </div>
                         </form>
-                    </div>
-                </div>
-
-                <div class="card ma-card mb-4">
-                    <div class="card-header ma-card-head"><strong>Menu items</strong></div>
-                    <div class="card-body">
-                        <form action="{{ route('diningMenu.items.store') }}" method="POST" enctype="multipart/form-data" class="row g-2 align-items-end mb-4 border-bottom pb-4">
-                            @csrf
-                            <div class="col-md-4"><label class="form-label">Title</label><input type="text" name="title" class="form-control" required></div>
-                            <div class="col-md-2"><label class="form-label">Price (USD)</label><input type="number" step="0.01" min="0" name="price_usd" class="form-control" required></div>
-                            <div class="col-md-4"><label class="form-label">Image</label><input type="file" name="image" class="form-control" accept="image/*"></div>
-                            <div class="col-md-2"><button type="submit" class="btn btn-success w-100">Add item</button></div>
-                        </form>
-
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead><tr><th></th><th>Title</th><th>USD</th><th></th></tr></thead>
-                                <tbody>
-                                    @foreach ($items as $item)
-                                        <tr>
-                                            <td style="width:72px;">
-                                                @if ($item->image)
-                                                    <img src="{{ asset('storage/images/dining/'.$item->image) }}" alt="" class="rounded" style="width:64px;height:48px;object-fit:cover;">
-                                                @endif
-                                            </td>
-                                            <td>
-                                                <form action="{{ route('diningMenu.items.update', $item) }}" method="POST" enctype="multipart/form-data" class="d-flex flex-wrap gap-2 align-items-center">
-                                                    @csrf
-                                                    <input type="text" name="title" value="{{ $item->title }}" class="form-control form-control-sm" style="max-width:220px;">
-                                                    <input type="number" step="0.01" name="price_usd" value="{{ $item->price_usd }}" class="form-control form-control-sm" style="width:100px;">
-                                                    <input type="file" name="image" class="form-control form-control-sm" style="max-width:200px;">
-                                                    <button type="submit" class="btn btn-sm btn-outline-primary">Update</button>
-                                                </form>
-                                            </td>
-                                            <td>${{ number_format($item->price_usd, 2) }}</td>
-                                            <td class="text-end">
-                                                <form action="{{ route('diningMenu.items.destroy', $item) }}" method="POST" onsubmit="return confirm('Remove this item?');">
-                                                    @csrf @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
                     </div>
                 </div>
 

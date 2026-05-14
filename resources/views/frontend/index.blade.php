@@ -61,31 +61,42 @@
             <!-- Slider Section End -->
 
 
-        <!-- About Area start -->
-        <section class="activity-area pt-30 rpt-50 pb-10 rpb-20 rel z-1">
-            <div class="container">
-            <section class="about-area-three pb-10 rpb-95 rel">
-                <div class="container" style="width: min(1320px, calc(100% - 30px)); margin: 0 auto; text-align: center;">
-                    <div class="row align-items-center justify-content-center">
-                        <div class="col-12">
-                            <div class="about-content-three rmb-55 wow fadeInLeft delay-0-2s">
-                                <div class="section-title mb-10">
-                                    <h2>Welcome to Martin Aviator Hotel</h2>
-                                    <p>{!! $about->welcome ?? '' !!}</p>
-                                </div>
-                                {{-- <a href="{{ route('rooms') }}" class="theme-btn" 
-                                   style="display: inline-block; padding: 12px 25px; background-color: #000000; color: #fff; border-radius: 5px; 
-                                          box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); transition: all 0.3s ease-in-out; text-decoration: none;">
-                                    Reserve Your Room Now <i class="far fa-angle-right"></i>
-                                </a> --}}
+        @php
+            $welcomeImage = ! empty($about?->aboutImage)
+                ? asset('storage/images/gallery/' . ltrim($about->aboutImage, '/'))
+                : null;
+        @endphp
+        <!-- Welcome (below hero) -->
+        <section class="home-welcome-section rel z-1 py-50 rpy-40">
+            <div class="container-fluid home-welcome-container px-3 px-sm-4 px-lg-5">
+                <div class="row align-items-center g-3 g-lg-4">
+                    @if ($welcomeImage)
+                        <div class="col-lg-5 wow fadeInLeft delay-0-2s">
+                            <figure class="home-welcome-media mb-0">
+                                <img src="{{ $welcomeImage }}" alt="Martin Aviator Hotel" loading="lazy" width="640" height="480">
+                            </figure>
+                        </div>
+                    @endif
+                    <div class="col-12 col-lg-{{ $welcomeImage ? '7' : '12' }} wow fadeInUp delay-0-2s">
+                        <div class="home-welcome-content">
+                            <h2 class="home-welcome-title">Welcome to Martin Aviator Hotel</h2>
+                            <ul class="home-welcome-highlights" aria-hidden="true">
+                                <li><i class="fas fa-plane" aria-hidden="true"></i><span>Airport proximity</span></li>
+                                <li><i class="fas fa-bed" aria-hidden="true"></i><span>Comfortable stays</span></li>
+                                <li><i class="fas fa-concierge-bell" aria-hidden="true"></i><span>Warm hospitality</span></li>
+                            </ul>
+                            <div class="home-welcome-body welcome-prose">
+                                {!! $about?->welcome ?? '' !!}
                             </div>
+                            <a href="{{ route('aboutUs') }}" class="theme-btn style-three home-welcome-cta mt-35">
+                                View more <i class="far fa-angle-right"></i>
+                            </a>
                         </div>
                     </div>
                 </div>
-            </section>
             </div>
         </section>
-        <!-- About Area end -->
+        <!-- Welcome end -->
         
 
         <!-- Room Area start -->
@@ -98,44 +109,45 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="container-fluid">
-                <div class="room-two-active">
-                    @foreach ($rooms as $room)
-                    <div class="room-two-item wow fadeInUp delay-0-2s">
-                        <div class="image">
-                            <img src="{{ asset('storage/images/rooms/' . $room->image) }}" alt="Room">
-                        </div>
-                        <div class="content">
-                            <h3><a href="room-details.html">{{ $room->roomName }}</a></h3>
-                            <ul class="blog-meta">
-                                <li>
-                                    <i class="far fa-bed-alt"></i>
-                                    <a href="#">Adults : {{ $room->maxAdults }}</a>
-                                </li>
-                                <div style="display: flex; align-items: center; gap: 20px; font-size: 16px; color: #333; font-weight: 500;">
-                                    <i class="fas fa-bed brand-accent-icon" style="font-size: 20px;"></i> Bed
-                                    <i class="fas fa-coffee brand-accent-icon" style="font-size: 20px; margin-left: 15px;"></i> Breakfast
+                <div class="row g-4 g-lg-4 home-rooms-grid-row justify-content-center">
+                    @foreach ($rooms->take(4) as $room)
+                        <div class="col-md-6 wow fadeInUp delay-0-2s">
+                            <article class="room-two-item home-room-card h-100 d-flex flex-column">
+                                <div class="image home-room-card__image">
+                                    <img
+                                        class="home-room-card__img"
+                                        src="{{ asset('storage/images/rooms/' . $room->image) }}"
+                                        alt="{{ $room->roomName }}"
+                                        loading="lazy"
+                                        width="800"
+                                        height="500"
+                                    >
                                 </div>
-                                
-                            </ul>
-                            <div class="price">
-                                <b>{!! \App\Support\Currency::formatUsdHover($room->price) !!}</b>/<br>
-                                <span>per night</span>
-                            </div>
-
-                            
-                            <a href="{{ route('singleRoom',['slug'=>$room->slug]) }}" class="theme-btn" 
-                                   style="display: inline-block; padding: 12px 25px; background-color: #000000; color: #fff; border-radius: 5px; 
-                                          box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); transition: all 0.3s ease-in-out; text-decoration: none;">
-                                    View Details <i class="far fa-angle-right"></i>
-                                </a>
+                                <div class="content flex-grow-1 d-flex flex-column">
+                                    <h3 class="mb-15"><a href="{{ route('singleRoom', ['slug' => $room->slug]) }}">{{ $room->roomName }}</a></h3>
+                                    <ul class="room-amenity-chips" aria-label="Room highlights">
+                                        <li><i class="fas fa-bed" aria-hidden="true"></i><span>Bed</span></li>
+                                        <li><i class="fas fa-coffee" aria-hidden="true"></i><span>Breakfast</span></li>
+                                    </ul>
+                                    <div class="price">
+                                        <b>{!! \App\Support\Currency::formatUsdWithLocal($room->price, $room->price_rwf) !!}</b>/<br>
+                                        <span>per night</span>
+                                    </div>
+                                    <a href="{{ route('singleRoom', ['slug' => $room->slug]) }}" class="theme-btn style-three home-room-card__btn mt-auto w-100 d-inline-flex justify-content-center align-items-center">
+                                        View Details <i class="far fa-angle-right"></i>
+                                    </a>
+                                </div>
+                            </article>
                         </div>
-                    </div>
                     @endforeach
-
-
                 </div>
+                @if ($rooms->count() > 4)
+                    <div class="text-center mt-50 wow fadeInUp delay-0-2s">
+                        <a href="{{ route('rooms') }}" class="theme-btn style-three">
+                            View more rooms <i class="far fa-angle-right"></i>
+                        </a>
+                    </div>
+                @endif
             </div>
             <div class="bg-lines">
                <span></span><span></span>
@@ -149,108 +161,7 @@
 
         @include('frontend.includes.flexible-stay')
 
-        @include('frontend.layouts.facilities')
-        <!-- Food Drink Area start -->
-        <section class="food-drink-area pt-30 rpt-100 pb-30 rpb-130">
-            <div class="container">
-                <div class="row align-items-center">
-                    <div class="col-lg-5">
-
-                        <div class="faq-content-part wow fadeInLeft delay-0-2s">
-                            <div class="section-title mb-30">
-                                <h2>Why Choosing Us</h2>
-                            </div>
-                            <div class="accordion" id="faq-accordion">
-                                <div class="accordion-item">
-                                    <h5 class="accordion-header">
-                                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapseOne">
-                                            01. Exquisite Dining Experience
-                                        </button>
-                                    </h5>
-                                    <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#faq-accordion">
-                                        <div class="accordion-body">
-                                            <p>
-                                                Enjoy a variety of delicious local and international cuisines, 
-                                            freshly prepared by our expert chefs to satisfy your taste buds
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="accordion-item">
-                                    <h5 class="accordion-header">
-                                        <button class="accordion-button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
-                                            02. Affordable Luxury with Stunning Views
-                                        </button>
-                                    </h5>
-                                    <div id="collapseTwo" class="accordion-collapse collapse show" data-bs-parent="#faq-accordion">
-                                        <div class="accordion-body">
-                                            <p>
-                                                Experience top-notch hospitality at competitive prices, 
-                                            all while enjoying breathtaking views of Lake Kivu and the surrounding mountains
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="accordion-item">
-                                    <h5 class="accordion-header">
-                                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapseThree">
-                                            03. Convenient Transport Services
-                                        </button>
-                                    </h5>
-                                    <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#faq-accordion">
-                                        <div class="accordion-body">
-                                            <p>
-                                                We offer seamless airport transfers and reliable local transport, 
-                                            ensuring a stress-free journey from arrival to departure
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="accordion-item">
-                                    <h5 class="accordion-header">
-                                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapseFour">
-                                            04. Best Tour & Boat Service Recommendations
-                                        </button>
-                                    </h5>
-                                    <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#faq-accordion">
-                                        <div class="accordion-body">
-                                            <p>
-                                                Explore the beauty of Kibuye with our expertly guided tours and recommended boat agencies for an unforgettable adventure on Lake Kivu
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="accordion-item">
-                                    <h5 class="accordion-header">
-                                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapseFour">
-                                            05. Privacy & Security Guaranteed
-                                        </button>
-                                    </h5>
-                                    <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#faq-accordion">
-                                        <div class="accordion-body">
-                                            <p>
-                                                Enjoy a peaceful stay with 24/7 security and well-maintained private spaces, ensuring comfort and safety throughout your visit
-
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-7">
-                        <div class="food-drink-image rel wow fadeInUp delay-0-4s">
-                            @if (! empty($about->aboutImage))
-                                <img src="{{ asset('storage/images/gallery/' . ltrim($about->aboutImage, '/')) }}" alt="Food Restaurant" loading="lazy" decoding="async">
-                            @else
-                                <div class="bgc-black r-10" style="min-height: 320px; border-radius: 8px;" role="img" aria-label="Restaurant"></div>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <!-- Food Drink Area end -->
+        @include('frontend.includes.home-dining-choose-row')
                 
         {{-- @include('frontend.includes.gallery') --}}
 

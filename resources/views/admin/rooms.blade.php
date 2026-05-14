@@ -60,7 +60,7 @@
                                     @foreach ($rooms as $rs)
                                         <tr>
                                             <td>{{ $rs->roomName }}</td>
-                                            <td>{!! \App\Support\Currency::formatUsdHover($rs->price) !!}</td>
+                                            <td>{!! \App\Support\Currency::formatUsdWithLocal($rs->price, $rs->price_rwf) !!}</td>
                                             <td>{{ $rs->category }}</td>
                                             <td><img src="{{ asset('storage/images/rooms/' . $rs->image) }}" alt="" width="150px"></td>
                                             <td>
@@ -119,8 +119,12 @@
                                                 </div>
                                     
                                                 <div class="col-md-3">
-                                                    <label for="singlePrice">Price in $</label>
+                                                    <label for="singlePrice">Price (USD / night)</label>
                                                     <input type="text" id="price" class="form-control" placeholder="Price/ Night" name="price" required>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label for="price_rwf">Price (RWF, optional)</label>
+                                                    <input type="number" step="1" min="0" id="price_rwf" class="form-control" placeholder="Exact local amount" name="price_rwf">
                                                 </div>
                                             </div>
                                     

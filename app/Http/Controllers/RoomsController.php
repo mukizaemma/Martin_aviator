@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Room;
 use App\Models\HotelAmenityOption;
+use App\Models\Room;
 use App\Models\roomImage;
 use App\Models\RoomType;
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\File\File;
 
 class RoomsController extends Controller
@@ -18,9 +17,9 @@ class RoomsController extends Controller
     public function roomType()
     {
         $rooms = RoomType::latest()->get();
-        return view('admin.rooms',['rooms'=>$rooms]);
-    }
 
+        return view('admin.rooms', ['rooms' => $rooms]);
+    }
 
     public function roomTypeCreate(Request $request)
     {
@@ -28,11 +27,13 @@ class RoomsController extends Controller
         $room = RoomType::firstOrCreate(
             [
                 'name' => $request->input('name'),
-                'description' => $request->input('description')
+                'description' => $request->input('description'),
             ]
         );
+
         return redirect('roomCrud')->with('success', 'New Room has been added successfuly');
     }
+
     public function amenityCreate(Request $request)
     {
         $request->validate(['name' => 'required|string|max:255']);
@@ -62,7 +63,7 @@ class RoomsController extends Controller
     {
 
         $fileName = '';
-        if($request->hasFile('image')){
+        if ($request->hasFile('image')) {
             $file = $request->file('image');
 
             $path = $file->store('public/images/rooms');
@@ -79,7 +80,8 @@ class RoomsController extends Controller
                 'roomName' => $request->input('roomName'),
                 'category' => $request->input('category'),
                 'price' => $request->input('price'),
-                'size' => $request->input('quantity'),
+                'price_rwf' => $request->filled('price_rwf') ? $request->input('price_rwf') : null,
+                'size' => $request->input('size'),
                 'maxAdults' => $request->input('maxAdults'),
                 'maxChildren' => $request->input('maxChildren'),
                 'description' => $request->input('description'),
@@ -92,7 +94,6 @@ class RoomsController extends Controller
 
         return redirect('getRooms')->with('success', 'New Room has been added successfuly');
     }
-
 
     public function edit($id)
     {
@@ -110,14 +111,14 @@ class RoomsController extends Controller
         $room = Room::findOrFail($id);
 
         // Update image if a new one is uploaded
-        if($request->hasFile('image')){
+        if ($request->hasFile('image')) {
             $file = $request->file('image');
 
             $path = $file->store('public/images/rooms');
             $fileName = basename($path);
 
             // Delete the old image file
-            Storage::delete('public/images/rooms/' . $room->image);
+            Storage::delete('public/images/rooms/'.$room->image);
 
             $room->image = $fileName;
         }
@@ -125,23 +126,24 @@ class RoomsController extends Controller
         // Update other fields
         $room->roomName = $request->input('roomName');
         $room->price = $request->input('price');
-        $room->size = $request->input('quantity');
+        $room->price_rwf = $request->filled('price_rwf') ? $request->input('price_rwf') : null;
+        $room->size = $request->input('size');
         $room->maxAdults = $request->input('maxAdults');
         $room->maxChildren = $request->input('maxChildren');
         $room->description = $request->input('description');
         // $room->status = $request->input('status');
 
         // Update the slug if the title has changed
-        if($room->roomName !== $request->input('roomName')){
+        if ($room->roomName !== $request->input('roomName')) {
             $slug = Str::of($request->input('roomName'))->slug();
             // Check if a blog post with the same slug already exists
             $existingpost = Room::where('slug', $slug)->first();
-            if($existingpost && $existingpost->id !== $room->id){
+            if ($existingpost && $existingpost->id !== $room->id) {
                 $suffix = 1;
-                do{
-                    $newSlug = $slug . '-' . $suffix++;
+                do {
+                    $newSlug = $slug.'-'.$suffix++;
                     $existingpost = Room::where('slug', $newSlug)->first();
-                }while($existingpost);
+                } while ($existingpost);
                 $slug = $newSlug;
             }
             $room->slug = $slug;
@@ -154,19 +156,17 @@ class RoomsController extends Controller
         return redirect('getRooms')->with('success', 'Room has been updated successfuly');
     }
 
-
     public function destroy($id)
     {
         $room = Room::findOrFail($id);
 
         // Delete the image file
-        Storage::delete('public/images/rooms/' . $room->image);
+        Storage::delete('public/images/rooms/'.$room->image);
 
         // Delete the post
         $room->delete();
 
         return redirect('getRooms')->with('success', 'Room has been deleted');
-
 
     }
 
@@ -174,12 +174,13 @@ class RoomsController extends Controller
     {
         $room = Room::find($pid);
         $images = DB::table('room_images')->where('room_id', $pid)->get();
+
         return view('admin.images.roomImages', ['room' => $room, 'images' => $images]);
     }
 
     public function savRoomImage(Request $request, $pid)
     {
-        $data = new roomImage();
+        $data = new roomImage;
         $data->room_id = $pid;
         if ($request->hasFile('image')) {
             $dir = 'public/images/rooms';
@@ -190,25 +191,24 @@ class RoomsController extends Controller
 
         $stored = $data->save();
 
-        if($stored){
+        if ($stored) {
             return redirect()->back()->with('success', 'Image has been saved successfuly');
         }
 
-        return redirect()->back()->with('error','Failed to add new Image');
+        return redirect()->back()->with('error', 'Failed to add new Image');
     }
 
-        public function destroyRoomImage($id)
+    public function destroyRoomImage($id)
     {
         $room = roomImage::findOrFail($id);
 
         // Delete the image file
-        Storage::delete('public/images/rooms/' . $room->image);
+        Storage::delete('public/images/rooms/'.$room->image);
 
         // Delete the post
         $room->delete();
 
         return redirect()->Back()->with('success', 'Image has been deleted');
-
 
     }
 
@@ -217,15 +217,15 @@ class RoomsController extends Controller
         $room = RoomType::findOrFail($id);
 
         // Delete the image file
-        Storage::delete('public/images/rooms/' . $room->image);
+        Storage::delete('public/images/rooms/'.$room->image);
 
         // Delete the post
         $room->delete();
 
         return redirect('roomType')->with('success', 'Room type has been deleted');
 
-
     }
+
     public function amenityDelete($id)
     {
         $amenity = HotelAmenityOption::findOrFail($id);

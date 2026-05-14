@@ -4,20 +4,38 @@ namespace App\Http\Controllers;
 
 use App\Models\DiningGalleryImage;
 use App\Models\DiningMenuItem;
+use App\Models\MenuCategory;
 use App\Models\Setting;
+use App\Services\OpenAiImageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class DiningController extends Controller
 {
     public function index()
     {
         $setting = Setting::first() ?? new Setting;
-        $items = DiningMenuItem::orderBy('sort_order')->orderBy('title')->get();
         $gallery = DiningGalleryImage::orderBy('sort_order')->orderBy('id')->get();
 
-        return view('admin.dining.index', compact('setting', 'items', 'gallery'));
+        return view('admin.dining.index', compact('setting', 'gallery'));
+    }
+
+    public function menuManage()
+    {
+        $items = DiningMenuItem::with('category')->orderBy('sort_order')->orderBy('title')->get();
+        $categories = MenuCategory::orderBy('sort_order')->orderBy('name')->get();
+
+        return view('admin.dining.menu', compact('items', 'categories'));
+    }
+
+    public function menuCategoriesManage()
+    {
+        $categories = MenuCategory::withCount('items')->orderBy('sort_order')->orderBy('name')->get();
+
+        return view('admin.dining.menu-categories', compact('categories'));
     }
 
     public function savePage(Request $request)
@@ -38,12 +56,130 @@ class DiningController extends Controller
         return redirect()->route('diningMenu')->with('success', 'Dining page content saved.');
     }
 
+    public function storeCategory(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'cover_image' => 'nullable|image|max:6144',
+        ]);
+
+        $imageName = null;
+        if ($request->hasFile('cover_image')) {
+            $path = $request->file('cover_image')->store('images/menu-categories', 'public');
+            $imageName = basename($path);
+        }
+
+        $maxSort = (int) MenuCategory::max('sort_order');
+
+        MenuCategory::create([
+            'name' => $request->name,
+            'cover_image' => $imageName,
+            'sort_order' => $maxSort + 1,
+        ]);
+
+        return redirect()->route('diningMenu.categories.manage')->with('success', 'Menu category created.');
+    }
+
+    public function updateCategory(Request $request, MenuCategory $category)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'cover_image' => 'nullable|image|max:6144',
+        ]);
+
+        $category->name = $request->name;
+
+        if ($request->hasFile('cover_image')) {
+            if ($category->cover_image) {
+                Storage::disk('public')->delete('images/menu-categories/'.$category->cover_image);
+            }
+            $path = $request->file('cover_image')->store('images/menu-categories', 'public');
+            $category->cover_image = basename($path);
+        }
+
+        $category->save();
+
+        return redirect()->route('diningMenu.categories.manage')->with('success', 'Category updated.');
+    }
+
+    public function destroyCategory(MenuCategory $category)
+    {
+        if ($category->cover_image) {
+            Storage::disk('public')->delete('images/menu-categories/'.$category->cover_image);
+        }
+        $category->delete();
+
+        return redirect()->route('diningMenu.categories.manage')->with('success', 'Category removed. Items in this category are now uncategorized.');
+    }
+
+    public function aiSuggestImages(Request $request, OpenAiImageService $openAi)
+    {
+        $request->validate([
+            'menu_title' => 'nullable|string|max:255',
+            'items_summary' => 'required|string|max:2000',
+        ]);
+
+        if (! config('services.openai.key')) {
+            return response()->json(['message' => 'Add OPENAI_API_KEY to your .env file to enable AI images.'], 422);
+        }
+
+        $title = $request->input('menu_title') ?: 'Restaurant menu';
+        $summary = $request->input('items_summary');
+        $prompt = 'Premium hotel restaurant hero image for category titled "'.addslashes($title).'". Dishes and mood inspired by: '.$summary.'. Photorealistic, appetizing, warm lighting, no text overlay, no logos.';
+
+        $urls = $openAi->generateMenuCovers($prompt, 3);
+
+        if ($urls === []) {
+            return response()->json(['message' => 'No images returned. Check API billing and model access.'], 422);
+        }
+
+        return response()->json(['urls' => $urls]);
+    }
+
+    public function saveCategoryCoverFromUrl(Request $request, MenuCategory $category)
+    {
+        $request->validate([
+            'url' => 'required|url|max:2000',
+        ]);
+
+        $url = $request->input('url');
+        $host = strtolower((string) parse_url($url, PHP_URL_HOST));
+        $allowed =
+            str_contains($host, 'openai')
+            || str_contains($host, 'blob.core.windows.net')
+            || str_contains($host, 'azure');
+        if (! $allowed) {
+            return response()->json(['message' => 'URL host is not allowed.'], 422);
+        }
+
+        try {
+            $bin = Http::timeout(60)->get($url)->body();
+            if (strlen($bin) < 500) {
+                return response()->json(['message' => 'Image download failed.'], 422);
+            }
+            $name = 'cat-cover-'.Str::random(12).'.png';
+            Storage::disk('public')->put('images/menu-categories/'.$name, $bin);
+            if ($category->cover_image) {
+                Storage::disk('public')->delete('images/menu-categories/'.$category->cover_image);
+            }
+            $category->cover_image = $name;
+            $category->save();
+        } catch (\Throwable $e) {
+            return response()->json(['message' => 'Could not save image.'], 422);
+        }
+
+        return response()->json(['ok' => true, 'cover_url' => asset('storage/images/menu-categories/'.$category->cover_image)]);
+    }
+
     public function storeMenuItem(Request $request)
     {
         $request->validate([
             'title' => 'required|string|max:255',
+            'description' => 'nullable|string|max:5000',
             'price_usd' => 'required|numeric|min:0',
+            'price_rwf' => 'nullable|numeric|min:0',
             'image' => 'nullable|image|max:4096',
+            'menu_category_id' => 'nullable|exists:menu_categories,id',
         ]);
 
         $imageName = null;
@@ -56,24 +192,33 @@ class DiningController extends Controller
 
         DiningMenuItem::create([
             'title' => $request->title,
+            'description' => $request->input('description'),
             'price_usd' => $request->price_usd,
+            'price_rwf' => $request->filled('price_rwf') ? $request->input('price_rwf') : null,
             'image' => $imageName,
             'sort_order' => $maxSort + 1,
+            'menu_category_id' => $request->input('menu_category_id'),
         ]);
 
-        return redirect()->route('diningMenu')->with('success', 'Menu item added.');
+        return redirect()->route('diningMenu.manage')->with('success', 'Menu item added.');
     }
 
     public function updateMenuItem(Request $request, DiningMenuItem $item)
     {
         $request->validate([
             'title' => 'required|string|max:255',
+            'description' => 'nullable|string|max:5000',
             'price_usd' => 'required|numeric|min:0',
+            'price_rwf' => 'nullable|numeric|min:0',
             'image' => 'nullable|image|max:4096',
+            'menu_category_id' => 'nullable|exists:menu_categories,id',
         ]);
 
         $item->title = $request->title;
+        $item->description = $request->input('description');
         $item->price_usd = $request->price_usd;
+        $item->price_rwf = $request->filled('price_rwf') ? $request->input('price_rwf') : null;
+        $item->menu_category_id = $request->input('menu_category_id');
 
         if ($request->hasFile('image')) {
             if ($item->image) {
@@ -85,7 +230,7 @@ class DiningController extends Controller
 
         $item->save();
 
-        return redirect()->route('diningMenu')->with('success', 'Menu item updated.');
+        return redirect()->route('diningMenu.manage')->with('success', 'Menu item updated.');
     }
 
     public function destroyMenuItem(DiningMenuItem $item)
@@ -95,7 +240,7 @@ class DiningController extends Controller
         }
         $item->delete();
 
-        return redirect()->route('diningMenu')->with('success', 'Menu item removed.');
+        return redirect()->route('diningMenu.manage')->with('success', 'Menu item removed.');
     }
 
     public function storeGallery(Request $request)

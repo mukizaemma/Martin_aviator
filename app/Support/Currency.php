@@ -24,19 +24,38 @@ class Currency
     }
 
     /**
-     * HTML span: USD with hover title showing RWF equivalent.
+     * Primary display: USD. RWF from stored amount if set, otherwise from settings rate.
+     * Hover: native tooltip on title. Click/tap/Enter: toggles inline RWF (see dual-currency.js).
      */
-    public static function formatUsdHover(float|string|null $usd, ?float $rate = null): string
+    public static function formatUsdWithLocal(float|string|null $usd, float|string|null $rwfStored = null, ?float $rateFallback = null): string
     {
         if ($usd === null || $usd === '') {
             return '';
         }
 
         $usd = (float) $usd;
-        $rwf = self::usdToRwf($usd, $rate);
+        $hasStoredRwf = $rwfStored !== null && $rwfStored !== '' && (float) $rwfStored > 0;
+        $rwf = $hasStoredRwf ? (float) $rwfStored : self::usdToRwf($usd, $rateFallback);
         $usdFmt = number_format($usd, $usd == floor($usd) ? 0 : 2);
         $rwfFmt = number_format($rwf, 0, '.', ',');
+        $source = $hasStoredRwf
+            ? 'Listed in admin as RWF.'
+            : 'Approximate RWF from your settings exchange rate.';
+        $title = '≈ '.$rwfFmt.' RWF. '.$source.' Click to show or hide next to the dollar price.';
 
-        return '<span class="usd-price-hint" title="Approx. '.$rwfFmt.' RWF (rate from settings)">$'.$usdFmt.'</span>';
+        $titleEsc = htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
+
+        return '<span class="dual-currency js-dual-currency" tabindex="0" role="button" aria-expanded="false" title="'.$titleEsc.'">'
+            .'<span class="dual-currency__usd">$'.$usdFmt.'</span>'
+            .'<span class="dual-currency__suffix"> · '.$rwfFmt.' RWF</span>'
+            .'</span>';
+    }
+
+    /**
+     * @deprecated Use formatUsdWithLocal($usd, null, $rate) — kept for older call sites.
+     */
+    public static function formatUsdHover(float|string|null $usd, ?float $rate = null): string
+    {
+        return self::formatUsdWithLocal($usd, null, $rate);
     }
 }

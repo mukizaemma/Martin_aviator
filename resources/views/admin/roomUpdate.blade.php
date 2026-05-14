@@ -66,6 +66,10 @@
                                     <label for="name">Room Price in USD</label>
                                     <input type="text" id="name" class="form-control" value="{{ $room->price }}" name="price">
                                 </div>
+                                <div class="col-md-3">
+                                    <label for="price_rwf">Price (RWF, optional)</label>
+                                    <input type="number" step="1" min="0" id="price_rwf" class="form-control" value="{{ $room->price_rwf ?? '' }}" name="price_rwf" placeholder="Exact local amount">
+                                </div>
                                         </div>
                                     <div class="row mt-3">
                                         <div class="col-md-3">
