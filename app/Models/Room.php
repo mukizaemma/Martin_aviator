@@ -12,7 +12,7 @@ class Room extends Model
 
     protected $table = 'rooms';
 
-    protected $fillable = ['roomName', 'category', 'image', 'slug', 'roomType', 'price', 'price_rwf', 'size', 'quantity', 'maxAdults', 'maxChildren', 'description'];
+    protected $fillable = ['roomName', 'category', 'image', 'slug', 'price', 'price_rwf', 'size', 'quantity', 'maxAdults', 'maxChildren', 'description'];
 
     protected $casts = [
         'price' => 'decimal:2',

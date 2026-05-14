@@ -102,22 +102,10 @@
                                         <form class="form" action="{{ route('saveRoom') }}" method="POST" enctype="multipart/form-data">
                                             @csrf
                                             <div class="row mt-3">
-                                                <div class="col-md-3">
-                                                    <label for="roomType_id">Room Type</label>
-                                                    <select class="form-control border-success" name="category" id="category" required>
-                                                        <option value=""></option>
-                                                        <option value="single">Single</option>
-                                                        <option value="double">Double</option>
-                                                        <option value="tween">Tween</option>
-                                                        <option value="apartment">Apartment</option>
-                                                    </select>
-                                                </div>
-                                    
                                                 <div class="col-md-6">
                                                     <label for="roomName">Room Name</label>
                                                     <input type="text" id="roomName" class="form-control" placeholder="Type Room Name" name="roomName" required>
                                                 </div>
-                                    
                                                 <div class="col-md-3">
                                                     <label for="singlePrice">Price (USD / night)</label>
                                                     <input type="text" id="price" class="form-control" placeholder="Price/ Night" name="price" required>

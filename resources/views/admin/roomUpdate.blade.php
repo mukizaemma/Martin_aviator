@@ -47,30 +47,19 @@
                         @csrf
                         <div class="modal-body">
                             <div class="row mt-3">
-                                <div class="col-md-3">
-                                        <label for="roomType_id">Room Type</label>
-                                        <select class="form-control border-success" name="category" id="category">
-                                            <option value="" disabled>{{ $room->category }}</option>
-                                            <option value="single">Single</option>
-                                            <option value="double">Double</option>
-                                            <option value="tween">Tween</option>
-                                            <option value="apartment">Apartment</option>
-                                        </select>
-                                </div>
-
                                 <div class="col-md-6">
-                                    <label for="name">Room Name</label>
+                                    <label for="roomName">Room Name</label>
                                     <input type="text" id="roomName" class="form-control" value="{{ $room->roomName }}" name="roomName">
-                                </div> 
+                                </div>
                                 <div class="col-md-3">
-                                    <label for="name">Room Price in USD</label>
-                                    <input type="text" id="name" class="form-control" value="{{ $room->price }}" name="price">
+                                    <label for="price">Room Price in USD</label>
+                                    <input type="text" id="price" class="form-control" value="{{ $room->price }}" name="price">
                                 </div>
                                 <div class="col-md-3">
                                     <label for="price_rwf">Price (RWF, optional)</label>
                                     <input type="number" step="1" min="0" id="price_rwf" class="form-control" value="{{ $room->price_rwf ?? '' }}" name="price_rwf" placeholder="Exact local amount">
                                 </div>
-                                        </div>
+                            </div>
                                     <div class="row mt-3">
                                         <div class="col-md-3">
                                             <label for="quantity">Room Size</label>

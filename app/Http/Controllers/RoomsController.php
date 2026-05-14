@@ -78,7 +78,7 @@ class RoomsController extends Controller
             ['slug' => $slug],
             [
                 'roomName' => $request->input('roomName'),
-                'category' => $request->input('category'),
+                'category' => $request->filled('category') ? $request->input('category') : null,
                 'price' => $request->input('price'),
                 'price_rwf' => $request->filled('price_rwf') ? $request->input('price_rwf') : null,
                 'size' => $request->input('size'),
