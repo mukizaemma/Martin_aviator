@@ -2,12 +2,24 @@
 
 namespace App\Models;
 
+use App\Support\FrontendPageCache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DiningMenuItem extends Model
 {
     protected $fillable = ['title', 'description', 'price_usd', 'price_rwf', 'image', 'sort_order', 'menu_category_id'];
+
+    protected static function booted(): void
+    {
+        static::saved(static function () {
+            FrontendPageCache::forgetDiningAndHome();
+        });
+
+        static::deleted(static function () {
+            FrontendPageCache::forgetDiningAndHome();
+        });
+    }
 
     protected $casts = [
         'price_usd' => 'decimal:2',

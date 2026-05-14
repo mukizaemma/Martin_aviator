@@ -8,12 +8,15 @@ use App\Models\Setting;
 use App\Models\SiteAnalyticsEvent;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 
 class GuestBookingController extends Controller
 {
-    public function create(Request $request): View
+    use Concerns\RendersSpaFragment;
+
+    public function create(Request $request): View|Response
     {
         SiteAnalyticsEvent::create([
             'event_key' => 'booking_form_view',
@@ -21,7 +24,6 @@ class GuestBookingController extends Controller
             'session_id' => substr(sha1($request->session()->getId()), 0, 40),
         ]);
 
-        $setting = Setting::first();
         $rooms = Room::with('images')->orderBy('roomName')->get();
         $prefillRoomId = $request->query('room_id');
         $prefillSlug = $request->query('room');
@@ -33,7 +35,7 @@ class GuestBookingController extends Controller
             $selectedRoomId = $r?->id;
         }
 
-        return view('frontend.room-booking', compact('setting', 'rooms', 'selectedRoomId'));
+        return $this->spaView('frontend.room-booking', compact('rooms', 'selectedRoomId'), 'Book a room');
     }
 
     public function store(Request $request): RedirectResponse
@@ -94,15 +96,14 @@ class GuestBookingController extends Controller
         };
     }
 
-    public function confirmation(string $publicId): View
+    public function confirmation(string $publicId): View|Response
     {
         $booking = GuestBookingRequest::where('public_id', $publicId)->firstOrFail();
         if ($booking->fulfillment_choice !== 'pay_on_delivery') {
             abort(404);
         }
-        $setting = Setting::first();
 
-        return view('frontend.room-booking-confirmation', compact('booking', 'setting'));
+        return $this->spaView('frontend.room-booking-confirmation', compact('booking'), 'Booking received');
     }
 
     public function openWhatsapp(Request $request, string $publicId): RedirectResponse
@@ -126,7 +127,7 @@ class GuestBookingController extends Controller
         return redirect()->away('https://wa.me/'.$digits.'?text='.$text);
     }
 
-    public function emailInstructions(Request $request, string $publicId): View
+    public function emailInstructions(Request $request, string $publicId): View|Response
     {
         $booking = GuestBookingRequest::where('public_id', $publicId)->firstOrFail();
         if ($booking->fulfillment_choice !== 'pay_on_delivery') {
@@ -144,16 +145,17 @@ class GuestBookingController extends Controller
         ]);
         $subject = 'Room booking — '.(Setting::first()->company ?? 'Hotel');
 
-        return view('frontend.room-booking-email', compact('booking', 'email', 'subject'));
+        return $this->spaView('frontend.room-booking-email', compact('booking', 'email', 'subject'), 'Email booking');
     }
 
-    public function otaRedirect(string $publicId, string $which): View
+    public function otaRedirect(string $publicId, string $which): View|Response
     {
         abort_unless(in_array($which, ['booking_com', 'expedia'], true), 404);
 
         $booking = GuestBookingRequest::where('public_id', $publicId)->firstOrFail();
-        $setting = Setting::first();
-        $url = $which === 'expedia' ? ($setting->url_expedia ?? '') : ($setting->url_booking ?? '');
+        $url = $which === 'expedia'
+            ? (Setting::first()->url_expedia ?? '')
+            : (Setting::first()->url_booking ?? '');
         if ($url === '') {
             abort(404, 'This OTA link is not configured in site settings.');
         }
@@ -164,7 +166,7 @@ class GuestBookingController extends Controller
             'session_id' => null,
         ]);
 
-        return view('frontend.room-booking-ota', compact('url', 'which', 'booking'));
+        return $this->spaView('frontend.room-booking-ota', compact('url', 'which', 'booking'), 'Continue booking');
     }
 
     private static function buildMessageBody(array $v, ?Room $room, ?Setting $setting, bool $pickup, bool $dropoff): string

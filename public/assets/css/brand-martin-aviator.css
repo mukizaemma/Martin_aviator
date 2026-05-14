@@ -1456,3 +1456,28 @@ h6,
 .ma-room-booking__option input {
   vertical-align: middle;
 }
+
+/* In-app navigation: slim progress bar (avoid full-screen preloader on each click) */
+body.spa-loading::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 40%;
+  background: var(--header-footer-accent, #e89b00);
+  z-index: 99999;
+  box-shadow: 0 0 12px rgba(232, 155, 0, 0.45);
+  animation: ma-spa-bar 0.85s ease-in-out infinite alternate;
+}
+
+@keyframes ma-spa-bar {
+  from {
+    transform: translateX(0);
+    opacity: 0.85;
+  }
+  to {
+    transform: translateX(150%);
+    opacity: 1;
+  }
+}

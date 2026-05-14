@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\About;
 use App\Models\Blog;
 use App\Models\Booking;
 use App\Models\DiningGalleryImage;
@@ -11,330 +10,141 @@ use App\Models\Facility;
 use App\Models\Image;
 use App\Models\MenuCategory;
 use App\Models\Message;
-use App\Models\Reservation;
 use App\Models\Room;
 use App\Models\Service;
-use App\Models\Setting;
 use App\Models\Slide;
-use App\Models\User;
 use App\Support\Currency;
+use App\Support\FrontendPageCache;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class HomeController extends Controller
 {
+    use Concerns\RendersSpaFragment;
+
     public function index()
     {
-        $slides = Slide::oldest()->get();
-        $categories = Image::select('category')->distinct()->pluck('category');
-        $images = Image::latest()->take(12)->get();
-        $blogs = Blog::latest()->take(6)->get();
-        $about = About::first();
-        $setting = Setting::first();
-        $users = User::select('id', 'name', 'email')->get();
-        $rooms = Room::with('images')->oldest()->get();
-        $services = Service::oldest()->get();
-        $gallery = Image::latest()->paginate(12);
-        $facilities = Facility::orderBy('created_at', 'asc')->paginate(6);
-        $menuCategoriesForHome = MenuCategory::with(['items' => function ($q) {
-            $q->orderBy('sort_order')->orderBy('title');
-        }])->orderBy('sort_order')->orderBy('name')->get();
-
-        $mapHomeDiningItem = static function (DiningMenuItem $i): array {
-            $rawDesc = $i->description ? strip_tags($i->description) : '';
-            $rawDesc = html_entity_decode($rawDesc, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-            $rawDesc = trim(preg_replace('/\s+/u', ' ', $rawDesc));
-            $short = Str::limit($rawDesc, 120);
+        $data = Cache::remember(FrontendPageCache::HOME_PAGE_DATA, 120, function () {
+            $slides = Slide::query()->oldest()->get();
+            $rooms = Room::query()
+                ->select(['id', 'roomName', 'slug', 'price', 'price_rwf', 'image'])
+                ->oldest()
+                ->get();
 
             return [
-                'title' => $i->title,
-                'description' => $short,
-                'descriptionTitle' => $rawDesc,
-                'priceHtml' => Currency::formatUsdWithLocal($i->price_usd, $i->price_rwf),
+                'slides' => $slides,
+                'rooms' => $rooms,
+                'homeDiningTwoColumns' => $this->buildHomeDiningTwoColumns(),
             ];
-        };
-
-        $withItems = $menuCategoriesForHome->filter(fn ($c) => $c->items->isNotEmpty())->values();
-
-        $foodCat = $withItems->first(function (MenuCategory $c) {
-            $n = mb_strtolower(trim($c->name));
-
-            return $n === 'food' || $n === 'foods' || str_contains($n, 'food');
-        });
-        $drinksCat = $withItems->first(function (MenuCategory $c) use ($foodCat) {
-            if ($foodCat && $c->id === $foodCat->id) {
-                return false;
-            }
-            $n = mb_strtolower(trim($c->name));
-
-            return (bool) preg_match('/beverage|drink|bar|wine|liquor|juice|soda|tea|coffee|beer|cocktail/', $n);
         });
 
-        $homeDiningTwoColumns = [];
-        if ($foodCat) {
-            $homeDiningTwoColumns[] = [
-                'label' => $foodCat->name,
-                'items' => $foodCat->items->map($mapHomeDiningItem)->values()->all(),
-            ];
-        }
-        if ($drinksCat) {
-            $homeDiningTwoColumns[] = [
-                'label' => $drinksCat->name,
-                'items' => $drinksCat->items->map($mapHomeDiningItem)->values()->all(),
-            ];
-        }
-
-        $usedIds = collect([$foodCat?->id, $drinksCat?->id])->filter();
-
-        foreach ($withItems as $c) {
-            if (count($homeDiningTwoColumns) >= 2) {
-                break;
-            }
-            if ($usedIds->contains($c->id)) {
-                continue;
-            }
-            if ($c->items->isEmpty()) {
-                continue;
-            }
-            $homeDiningTwoColumns[] = [
-                'label' => $c->name,
-                'items' => $c->items->map($mapHomeDiningItem)->values()->all(),
-            ];
-            $usedIds->push($c->id);
-        }
-
-        return view('frontend.index', compact(
-            'about', 'images', 'categories', 'rooms', 'facilities',
-            'services', 'slides', 'gallery', 'users', 'setting', 'blogs',
-            'homeDiningTwoColumns'
-        ));
+        return $this->spaView('frontend.index', $data, 'Home');
     }
 
     public function contact()
     {
-        $rooms = Room::with('images')->oldest()->get();
-        $setting = Setting::first();
-        $about = About::first();
-        $facilities = Facility::orderBy('created_at', 'asc')->paginate(6);
-
-        return view('frontend.contact', [
-            'rooms' => $rooms,
-            'setting' => $setting,
-            'facilities' => $facilities,
-            'about' => $about,
-        ]);
+        return $this->spaView('frontend.contact', [], 'Contact');
     }
 
     public function terms()
     {
-        $rooms = Room::with('images')->oldest()->get();
-        $setting = Setting::first();
-        $about = About::first();
-        $facilities = Facility::orderBy('created_at', 'asc')->paginate(6);
-
-        return view('frontend.terms', [
-            'rooms' => $rooms,
-            'setting' => $setting,
-            'facilities' => $facilities,
-            'about' => $about,
-        ]);
+        return $this->spaView('frontend.terms', [], 'Terms');
     }
 
     public function aboutUs()
     {
-        $rooms = Room::with('images')->oldest()->get();
-        $setting = Setting::first();
-        $about = About::first();
-        $facilities = Facility::orderBy('created_at', 'asc')->paginate(6);
-
-        return view('frontend.about', [
-            'rooms' => $rooms,
-            'setting' => $setting,
-            'facilities' => $facilities,
-            'about' => $about,
-        ]);
+        return $this->spaView('frontend.about', [], 'About');
     }
 
     public function facilities()
     {
-        $rooms = Room::with('images')->oldest()->get();
         $facilities = Facility::orderBy('created_at', 'asc')->get();
-        $setting = Setting::first();
         $gallery = Image::latest()->get();
         $diningGallery = DiningGalleryImage::orderBy('sort_order')->orderBy('id')->get();
 
-        return view('frontend.facilities', [
+        return $this->spaView('frontend.facilities', [
             'facilities' => $facilities,
-            'setting' => $setting,
-            'rooms' => $rooms,
             'gallery' => $gallery,
             'diningGallery' => $diningGallery,
-        ]);
+        ], 'Facilities');
     }
 
     public function dining()
     {
-        $rooms = Room::with('images')->oldest()->get();
-        $setting = Setting::first();
-        $about = About::first();
-        $facilities = Facility::orderBy('created_at', 'asc')->paginate(6);
+        $diningMenuColumns = Cache::remember(FrontendPageCache::DINING_MENU_COLUMNS, 180, function () {
+            return $this->buildDiningMenuColumns();
+        });
 
-        $allMenuItems = DiningMenuItem::query()
-            ->with('category')
-            ->leftJoin('menu_categories as mc', 'dining_menu_items.menu_category_id', '=', 'mc.id')
-            ->orderByRaw('COALESCE(mc.sort_order, 999999)')
-            ->orderBy('mc.name')
-            ->orderBy('dining_menu_items.sort_order')
-            ->orderBy('dining_menu_items.title')
-            ->select('dining_menu_items.*')
-            ->get();
-
-        $menuCategoriesForDining = MenuCategory::orderBy('sort_order')->orderBy('name')->get();
-
-        $serializeDiningItem = static function (DiningMenuItem $i): array {
-            $rawDesc = $i->description ? strip_tags($i->description) : '';
-            $rawDesc = html_entity_decode($rawDesc, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-            $rawDesc = trim(preg_replace('/\s+/u', ' ', $rawDesc));
-            $short = Str::limit($rawDesc, 160);
-
-            return [
-                'id' => $i->id,
-                'title' => $i->title,
-                'description' => $short,
-                'descriptionTitle' => $rawDesc,
-                'priceHtml' => Currency::formatUsdWithLocal($i->price_usd, $i->price_rwf),
-                'priceUsd' => number_format((float) $i->price_usd, 2, '.', ''),
-                'priceRwfAttr' => $i->price_rwf && (float) $i->price_rwf > 0
-                    ? (string) (int) round((float) $i->price_rwf)
-                    : '',
-            ];
-        };
-
-        $diningMenuColumns = [];
-        foreach ($menuCategoriesForDining as $cat) {
-            $catItems = $allMenuItems->where('menu_category_id', $cat->id)->values();
-            if ($catItems->isEmpty()) {
-                continue;
-            }
-            $diningMenuColumns[] = [
-                'label' => $cat->name,
-                'items' => $catItems->map($serializeDiningItem)->values()->all(),
-            ];
-        }
-        $uncatItems = $allMenuItems->whereNull('menu_category_id')->values();
-        if ($menuCategoriesForDining->isNotEmpty() && $uncatItems->isNotEmpty()) {
-            $diningMenuColumns[] = [
-                'label' => 'Other',
-                'items' => $uncatItems->map($serializeDiningItem)->values()->all(),
-            ];
-        }
-        if ($diningMenuColumns === [] && $allMenuItems->isNotEmpty()) {
-            $diningMenuColumns[] = [
-                'label' => 'Menu',
-                'items' => $allMenuItems->map($serializeDiningItem)->values()->all(),
-            ];
-        }
-
-        return view('frontend.dining', compact(
-            'rooms',
-            'setting',
-            'about',
-            'facilities',
+        return $this->spaView('frontend.dining', compact(
             'diningMenuColumns'
-        ));
+        ), 'Dining');
     }
 
     public function facilitySingle($slug)
     {
-        $rooms = Room::with('images')->oldest()->get();
-
         $facility = Facility::where('slug', $slug)->firstOrFail();
         $images = DB::table('facility_images')->where('facility_id', $facility->id)->latest()->get();
-        $reletedFacilities = Facility::where('id', '!=', $facility->id)->get();
-        $facilities = Facility::orderBy('created_at', 'asc')->paginate(6);
-        $setting = Setting::first();
+        $reletedFacilities = Facility::where('id', '!=', $facility->id)
+            ->orderBy('created_at')
+            ->take(12)
+            ->get();
 
-        return view('frontend.facilitySingle', [
+        return $this->spaView('frontend.facilitySingle', [
             'facility' => $facility,
             'images' => $images,
-            'setting' => $setting,
-            'facilities' => $facilities,
-            'rooms' => $rooms,
             'reletedFacilities' => $reletedFacilities,
-        ]);
+        ], $facility->title ?? 'Facility');
     }
 
     public function services()
     {
-        $rooms = Room::with('images')->oldest()->get();
         $services = Service::oldest()->get();
-        $setting = Setting::first();
-        $gallery = Image::latest()->get();
-        $facilities = Facility::orderBy('created_at', 'asc')->paginate(6);
 
-        return view('frontend.services', [
+        return $this->spaView('frontend.services', [
             'services' => $services,
-            'rooms' => $rooms,
-            'facilities' => $facilities,
-            'setting' => $setting,
-            'gallery' => $gallery,
-        ]);
+        ], 'Services');
     }
 
     public function singleService($slug)
     {
-
-        $rooms = Room::with('images')->oldest()->get();
         $service = Service::where('slug', $slug)->firstOrFail();
         $images = DB::table('service_images')->where('service_id', $service->id)->latest()->get();
-        $setting = Setting::first();
-        $gallery = Image::latest()->get();
-        $facilities = Facility::orderBy('created_at', 'asc')->paginate(6);
 
-        return view('frontend.serviceSingle', [
+        return $this->spaView('frontend.serviceSingle', [
             'service' => $service,
-            'rooms' => $rooms,
             'images' => $images,
-            'setting' => $setting,
-            'facilities' => $facilities,
-            'gallery' => $gallery,
-        ]);
+        ], $service->title ?? 'Service');
     }
 
     public function gallery()
     {
-        $rooms = Room::with('images')->oldest()->get();
         $categories = Image::select('category')->distinct()->pluck('category');
         $images = Image::latest()->get();
-        $setting = Setting::first();
-        $facilities = Facility::orderBy('created_at', 'asc')->paginate(6);
 
-        return view('frontend.gallery', [
+        return $this->spaView('frontend.gallery', [
             'images' => $images,
-            'setting' => $setting,
-            'rooms' => $rooms,
-            'facilities' => $facilities,
             'categories' => $categories,
-        ]);
+        ], 'Gallery');
     }
 
     public function blogs()
     {
-        $rooms = Room::with('images')->oldest()->get();
-        $gallery = Image::latest()->get();
-        $setting = Setting::first();
-        $facilities = Facility::orderBy('created_at', 'asc')->paginate(6);
         $blogs = Blog::latest()->paginate(9);
+        $gallery = Image::latest()->take(12)->get();
 
-        return view('frontend.blogs', [
-            'gallery' => $gallery,
-            'setting' => $setting,
-            'rooms' => $rooms,
-            'facilities' => $facilities,
+        return $this->spaView('frontend.blogs', [
             'blogs' => $blogs,
-        ]);
+            'gallery' => $gallery,
+        ], 'Updates');
+    }
+
+    public function blog(string $slug)
+    {
+        $post = Blog::where('slug', $slug)->firstOrFail();
+
+        return $this->spaView('frontend.blog', compact('post'), $post->title ?? 'Blog');
     }
 
     public function reservationPage()
@@ -342,44 +152,30 @@ class HomeController extends Controller
         // $reservation = Reservepolocy::all();
         $rooms = Room::all();
 
-        return view('frontend.reservation', [
+        return $this->spaView('frontend.reservation', [
             // 'reservation' => $reservation,
             'rooms' => $rooms,
-        ]);
+        ], 'Reservation');
     }
 
     public function rooms()
     {
-
         $rooms = Room::with('images')->oldest()->get();
-        $setting = Setting::first();
-        $about = About::first();
-        $facilities = Facility::orderBy('created_at', 'asc')->paginate(6);
 
-        return view('frontend.rooms', [
+        return $this->spaView('frontend.rooms', [
             'rooms' => $rooms,
-            'setting' => $setting,
-            'facilities' => $facilities,
-            'about' => $about,
-        ]);
+        ], 'Rooms');
     }
 
     public function singleRoom($slug)
     {
-
         $room = Room::with('amenityOptions')->where('slug', $slug)->firstOrFail();
         $images = DB::table('room_images')->where('room_id', $room->id)->paginate(3);
-        $rooms = Room::with('images')->oldest()->get();
-        $setting = Setting::first();
-        $facilities = Facility::orderBy('created_at', 'asc')->paginate(6);
 
-        return view('frontend.roomSingle', [
+        return $this->spaView('frontend.roomSingle', [
             'images' => $images,
             'room' => $room,
-            'rooms' => $rooms,
-            'setting' => $setting,
-            'facilities' => $facilities,
-        ]);
+        ], $room->roomName ?? 'Room');
     }
 
     public function SendMessage(Request $request)
@@ -488,7 +284,7 @@ class HomeController extends Controller
                 $startDate = strtotime('+1 day', $startDate);
             }
 
-            return view('frontend.availableRooms', compact('availableRooms', 'checkinDate', 'checkoutDate'));
+            return $this->spaView('frontend.availableRooms', compact('availableRooms', 'checkinDate', 'checkoutDate'), 'Availability');
         } elseif ($itemType == 'Table') {
             // Call function to check available rooms
             $availableTables = DB::table('tables')
@@ -508,7 +304,7 @@ class HomeController extends Controller
                 })
                 ->get();
 
-            return view('frontend.availableTables', compact('availableTables', 'checkinDate', 'checkoutDate'));
+            return $this->spaView('frontend.availableTables', compact('availableTables', 'checkinDate', 'checkoutDate'), 'Availability');
         }
     }
 
@@ -571,7 +367,146 @@ class HomeController extends Controller
 
         $gallery = Facility::where('category', 'Restaurant')->get();
 
-        return view('frontend.restaurant', ['gallery' => $gallery]);
+        return $this->spaView('frontend.restaurant', ['gallery' => $gallery], 'Restaurant');
+    }
+
+    /**
+     * @return array<int, array{label: string, items: array<int, mixed>}>
+     */
+    private function buildHomeDiningTwoColumns(): array
+    {
+        $menuCategoriesForHome = MenuCategory::with(['items' => function ($q) {
+            $q->orderBy('sort_order')->orderBy('title');
+        }])->orderBy('sort_order')->orderBy('name')->get();
+
+        $mapHomeDiningItem = static function (DiningMenuItem $i): array {
+            $rawDesc = $i->description ? strip_tags($i->description) : '';
+            $rawDesc = html_entity_decode($rawDesc, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $rawDesc = trim(preg_replace('/\s+/u', ' ', $rawDesc));
+            $short = Str::limit($rawDesc, 120);
+
+            return [
+                'title' => $i->title,
+                'description' => $short,
+                'descriptionTitle' => $rawDesc,
+                'priceHtml' => Currency::formatUsdWithLocal($i->price_usd, $i->price_rwf),
+            ];
+        };
+
+        $withItems = $menuCategoriesForHome->filter(fn ($c) => $c->items->isNotEmpty())->values();
+
+        $foodCat = $withItems->first(function (MenuCategory $c) {
+            $n = mb_strtolower(trim($c->name));
+
+            return $n === 'food' || $n === 'foods' || str_contains($n, 'food');
+        });
+        $drinksCat = $withItems->first(function (MenuCategory $c) use ($foodCat) {
+            if ($foodCat && $c->id === $foodCat->id) {
+                return false;
+            }
+            $n = mb_strtolower(trim($c->name));
+
+            return (bool) preg_match('/beverage|drink|bar|wine|liquor|juice|soda|tea|coffee|beer|cocktail/', $n);
+        });
+
+        $homeDiningTwoColumns = [];
+        if ($foodCat) {
+            $homeDiningTwoColumns[] = [
+                'label' => $foodCat->name,
+                'items' => $foodCat->items->map($mapHomeDiningItem)->values()->all(),
+            ];
+        }
+        if ($drinksCat) {
+            $homeDiningTwoColumns[] = [
+                'label' => $drinksCat->name,
+                'items' => $drinksCat->items->map($mapHomeDiningItem)->values()->all(),
+            ];
+        }
+
+        $usedIds = collect([$foodCat?->id, $drinksCat?->id])->filter();
+
+        foreach ($withItems as $c) {
+            if (count($homeDiningTwoColumns) >= 2) {
+                break;
+            }
+            if ($usedIds->contains($c->id)) {
+                continue;
+            }
+            if ($c->items->isEmpty()) {
+                continue;
+            }
+            $homeDiningTwoColumns[] = [
+                'label' => $c->name,
+                'items' => $c->items->map($mapHomeDiningItem)->values()->all(),
+            ];
+            $usedIds->push($c->id);
+        }
+
+        return $homeDiningTwoColumns;
+    }
+
+    /**
+     * @return array<int, array{label: string, items: array<int, mixed>}>
+     */
+    private function buildDiningMenuColumns(): array
+    {
+        $allMenuItems = DiningMenuItem::query()
+            ->with('category')
+            ->leftJoin('menu_categories as mc', 'dining_menu_items.menu_category_id', '=', 'mc.id')
+            ->orderByRaw('COALESCE(mc.sort_order, 999999)')
+            ->orderBy('mc.name')
+            ->orderBy('dining_menu_items.sort_order')
+            ->orderBy('dining_menu_items.title')
+            ->select('dining_menu_items.*')
+            ->get();
+
+        $menuCategoriesForDining = MenuCategory::orderBy('sort_order')->orderBy('name')->get();
+
+        $serializeDiningItem = static function (DiningMenuItem $i): array {
+            $rawDesc = $i->description ? strip_tags($i->description) : '';
+            $rawDesc = html_entity_decode($rawDesc, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $rawDesc = trim(preg_replace('/\s+/u', ' ', $rawDesc));
+            $short = Str::limit($rawDesc, 160);
+
+            return [
+                'id' => $i->id,
+                'title' => $i->title,
+                'description' => $short,
+                'descriptionTitle' => $rawDesc,
+                'priceHtml' => Currency::formatUsdWithLocal($i->price_usd, $i->price_rwf),
+                'priceUsd' => number_format((float) $i->price_usd, 2, '.', ''),
+                'priceRwfAttr' => $i->price_rwf && (float) $i->price_rwf > 0
+                    ? (string) (int) round((float) $i->price_rwf)
+                    : '',
+            ];
+        };
+
+        $diningMenuColumns = [];
+        foreach ($menuCategoriesForDining as $cat) {
+            $catItems = $allMenuItems->where('menu_category_id', $cat->id)->values();
+            if ($catItems->isEmpty()) {
+                continue;
+            }
+            $diningMenuColumns[] = [
+                'label' => $cat->name,
+                'items' => $catItems->map($serializeDiningItem)->values()->all(),
+            ];
+        }
+        $uncatItems = $allMenuItems->whereNull('menu_category_id')->values();
+        if ($menuCategoriesForDining->isNotEmpty() && $uncatItems->isNotEmpty()) {
+            $diningMenuColumns[] = [
+                'label' => 'Other',
+                'items' => $uncatItems->map($serializeDiningItem)->values()->all(),
+            ];
+        }
+        if ($diningMenuColumns === [] && $allMenuItems->isNotEmpty()) {
+            $diningMenuColumns[] = [
+                'label' => 'Menu',
+                'items' => $allMenuItems->map($serializeDiningItem)->values()->all(),
+            ];
+        }
+
+        return $diningMenuColumns;
     }
 
     /**

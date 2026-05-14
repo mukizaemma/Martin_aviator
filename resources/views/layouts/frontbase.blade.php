@@ -11,8 +11,11 @@
     <meta name="description" content="{{ $setting->keywords ?? '' }}">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="theme-color" content="#e89b00">
+    <meta name="spa-site-name" content="{{ e($setting->company ?? config('app.name')) }}">
 
     <!-- Title -->
     <title>{{ $setting->company ?? '' }}</title>
@@ -152,8 +155,9 @@
         <div class="form-back-drop"></div>
 
     <div class="container-fluid" id="spa-content" data-spa-container>
-        {{-- @show --}}
+        @fragment('spa-main')
         @yield('content')
+        @endfragment
     </div>
 
         @include('frontend.includes.amenities-band')
@@ -283,6 +287,12 @@
                 return;
             }
 
+            var spaFetchHeaders = {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-SPA-Partial': '1',
+                'Accept': 'text/html'
+            };
+
             var prefetchCache = new Map();
             var inFlightController = null;
 
@@ -311,19 +321,44 @@
 
             function showLoadingState(isLoading) {
                 document.body.classList.toggle('spa-loading', isLoading);
-                var preloader = document.querySelector('.preloader');
-                if (preloader) {
-                    preloader.style.display = isLoading ? 'block' : 'none';
-                }
             }
 
-            function reRunFrontendScripts() {
-                var scriptEl = document.querySelector('script[src*="assets/js/script.js"]');
-                if (!scriptEl) return;
-                var freshScript = document.createElement('script');
-                freshScript.src = scriptEl.src;
-                freshScript.defer = true;
-                scriptEl.parentNode.replaceChild(freshScript, scriptEl);
+            function reinitSpaContent() {
+                window.dispatchEvent(new Event('ma:spa-content'));
+            }
+
+            function applySpaTitle(spaTitleHeader) {
+                if (!spaTitleHeader) return;
+                var siteNameEl = document.querySelector('meta[name="spa-site-name"]');
+                var siteName = siteNameEl ? siteNameEl.getAttribute('content') : '';
+                document.title = siteName ? spaTitleHeader + ' | ' + siteName : spaTitleHeader;
+            }
+
+            function finalizeNavigation(parsed, requestUrl, pushState) {
+                if (window.jQuery && typeof window.maDestroySlickIn === 'function') {
+                    window.maDestroySlickIn(content);
+                }
+                content.innerHTML = parsed.contentHtml;
+                if (parsed.title) {
+                    document.title = parsed.title;
+                }
+                if (parsed.bodyClass !== undefined) {
+                    var hadSpaLoading = document.body.classList.contains('spa-loading');
+                    document.body.className = parsed.bodyClass;
+                    if (hadSpaLoading) {
+                        document.body.classList.add('spa-loading');
+                    }
+                }
+                window.scrollTo(0, 0);
+
+                if (pushState) {
+                    window.history.pushState({ spa: true, url: requestUrl }, '', requestUrl);
+                }
+
+                reinitSpaContent();
+                if (typeof window.initParallaxBackgrounds === 'function') {
+                    window.initParallaxBackgrounds();
+                }
             }
 
             function loadPage(url, pushState) {
@@ -337,35 +372,30 @@
 
                 var fetchPromise = prefetchCache.get(requestUrl) || fetch(requestUrl, {
                     signal: inFlightController.signal,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
+                    headers: spaFetchHeaders,
                     credentials: 'same-origin'
                 }).then(function (response) {
                     if (!response.ok) throw new Error('Navigation failed');
-                    return response.text();
+                    var spaTitle = response.headers.get('X-SPA-Title');
+                    return response.text().then(function (htmlText) {
+                        return { spaTitle: spaTitle, htmlText: htmlText };
+                    });
                 });
 
-                return fetchPromise.then(function (htmlText) {
-                    var parsed = extractDocumentParts(htmlText);
+                return fetchPromise.then(function (payload) {
+                    if (payload.spaTitle) {
+                        applySpaTitle(payload.spaTitle);
+                        finalizeNavigation({ contentHtml: payload.htmlText, title: null, bodyClass: undefined }, requestUrl, pushState);
+                        return;
+                    }
+
+                    var parsed = extractDocumentParts(payload.htmlText);
                     if (!parsed) {
                         window.location.href = requestUrl;
                         return;
                     }
 
-                    content.innerHTML = parsed.contentHtml;
-                    document.title = parsed.title;
-                    document.body.className = parsed.bodyClass;
-                    window.scrollTo(0, 0);
-
-                    if (pushState) {
-                        window.history.pushState({ spa: true, url: requestUrl }, '', requestUrl);
-                    }
-
-                    reRunFrontendScripts();
-                    if (typeof window.initParallaxBackgrounds === 'function') {
-                        window.initParallaxBackgrounds();
-                    }
+                    finalizeNavigation(parsed, requestUrl, pushState);
                 }).catch(function (error) {
                     if (error.name === 'AbortError') return;
                     window.location.href = requestUrl;
@@ -382,11 +412,13 @@
                 if (prefetchCache.has(href)) return;
 
                 prefetchCache.set(href, fetch(href, {
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    headers: spaFetchHeaders,
                     credentials: 'same-origin'
                 }).then(function (response) {
                     if (!response.ok) throw new Error('Prefetch failed');
-                    return response.text();
+                    return response.text().then(function (htmlText) {
+                        return { spaTitle: response.headers.get('X-SPA-Title'), htmlText: htmlText };
+                    });
                 }).catch(function () {
                     prefetchCache.delete(href);
                 }));

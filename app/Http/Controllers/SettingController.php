@@ -2,20 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\About;
+use App\Models\Setting;
+use App\View\Composers\FrontLayoutComposer;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
-use App\Models\Setting;
-use App\Models\About;
 
 class SettingController extends Controller
 {
-    public function setting(){
+    public function setting()
+    {
         $data = Setting::first();
-        if($data===null)
-        {
-            $data = new Setting();
+        if ($data === null) {
+            $data = new Setting;
             $data->title = 'Company Name';
             $data->company = 'Company Name';
             $data->save();
@@ -24,7 +25,7 @@ class SettingController extends Controller
 
         $about = About::first();
         if ($about === null) {
-            $about = new About();
+            $about = new About;
             $about->title = 'About';
             $about->save();
             $about = About::first();
@@ -36,9 +37,8 @@ class SettingController extends Controller
         ]);
     }
 
-
-
-    public function saveSetting(Request $request){
+    public function saveSetting(Request $request)
+    {
         $data = Setting::firstOrFail();
 
         DB::transaction(function () use ($request, $data) {
@@ -104,7 +104,7 @@ class SettingController extends Controller
 
             $about = About::first();
             if ($about === null) {
-                $about = new About();
+                $about = new About;
                 $about->title = $data->company ?? 'About';
             }
             $about->welcome = $request->input('welcome');
@@ -113,31 +113,31 @@ class SettingController extends Controller
             $about->save();
         });
 
+        Cache::forget(FrontLayoutComposer::CACHE_KEY_SETTING);
+        Cache::forget(FrontLayoutComposer::CACHE_KEY_ABOUT);
+
         return redirect()->back()->with('success', 'Settings have been updated successfully.');
     }
 
-    public function about(){
+    public function about()
+    {
         $data = About::first();
-        if($data===null)
-        {
-            $data = new About();
+        if ($data === null) {
+            $data = new About;
             $data->title = 'Company Name';
             $data->save();
             $data = About::first();
         }
 
-        return view('admin.about', ['data'=>$data]);
+        return view('admin.about', ['data' => $data]);
     }
 
-
-
-    public function saveAbout(Request $request){
+    public function saveAbout(Request $request)
+    {
         $data = About::first();
         $data->terms = $request->input('terms');
         $data->welcome = $request->input('welcome');
         $data->background = $request->input('background');
-
-
 
         if ($request->hasFile('aboutImage') && request('aboutImage') != '') {
             $dir = 'public/images/gallery';
@@ -162,7 +162,7 @@ class SettingController extends Controller
 
             $data->middleImage = $fileName;
         }
-        
+
         if ($request->hasFile('chooseusImage') && request('chooseusImage') != '') {
             $dir = 'public/images/gallery';
 
@@ -176,6 +176,8 @@ class SettingController extends Controller
         }
 
         $data->update();
+
+        Cache::forget(FrontLayoutComposer::CACHE_KEY_ABOUT);
 
         return redirect()->back()->with('success', 'Page has been updated successfully');
     }

@@ -74,7 +74,13 @@
         
         // ## Submenu Dropdown Toggle
         if ($('.main-header .navigation li.dropdown ul').length) {
-            $('.main-header .navigation li.dropdown').append('<div class="dropdown-btn"><span class="fas fa-chevron-down"></span></div>');
+            $('.main-header .navigation li.dropdown').each(function () {
+                var $li = $(this);
+                if ($li.children('.dropdown-btn').length) {
+                    return;
+                }
+                $li.append('<div class="dropdown-btn"><span class="fas fa-chevron-down"></span></div>');
+            });
 
             //Dropdown Button
             $('.main-header .navigation li.dropdown .dropdown-btn').on('click', function () {
@@ -484,14 +490,14 @@
         
         
         
-        // ## Gallery Filter
-        $(".gallery-filter li").on('click', function () {
-            $(".gallery-filter li").removeClass("current");
-            $(this).addClass("current");
+        // ## Gallery Filter (delegated — works after SPA swaps without rebinding)
+        $(document).off('click.maGalleryFilter').on('click.maGalleryFilter', '.gallery-filter li', function () {
+            $('.gallery-filter li').removeClass('current');
+            $(this).addClass('current');
 
             var selector = $(this).attr('data-filter');
             $('.gallery-masonry-active').imagesLoaded(function () {
-                $(".gallery-masonry-active").isotope({
+                $('.gallery-masonry-active').isotope({
                     itemSelector: '.item',
                     filter: selector,
                     masonry: {
@@ -551,18 +557,37 @@
         
         // ## Nice Select
         $('select').niceSelect();
-        
-        
+
+        window.maInitGalleryMasonryIfPresent = function () {
+            if (!$('.gallery-masonry-active').length) {
+                return;
+            }
+            var $g = $('.gallery-masonry-active');
+            if ($g.data('isotope')) {
+                try {
+                    $g.isotope('destroy');
+                } catch (e) {
+                }
+            }
+            $g.imagesLoaded(function () {
+                $g.isotope({
+                    itemSelector: '.item',
+                });
+            });
+        };
+
         // ## WOW Animation
         if ($('.wow').length) {
-            var wow = new WOW({
+            window.maWow = new WOW({
                 boxClass: 'wow', // animated element css class (default is wow)
                 animateClass: 'animated', // animation css class (default is animated)
                 offset: 0, // distance to the element when triggering the animation (default is 0)
                 mobile: false, // trigger animations on mobile devices (default is true)
                 live: true // act on asynchronously loaded content (default is true)
             });
-            wow.init();
+            window.maWow.init();
+        } else {
+            window.maWow = null;
         }
         
  
@@ -624,18 +649,303 @@
         
         
         // ## Gallery Filtering
-        if ($('.gallery-masonry-active').length) {
-            $(this).imagesLoaded(function () {
-                $('.gallery-masonry-active').isotope({
-                    // options
-                    itemSelector: '.item',
-                });
-            });
+        if (typeof window.maInitGalleryMasonryIfPresent === 'function') {
+            window.maInitGalleryMasonryIfPresent();
         }
           
         
     });
 
+})(window.jQuery);
+
+/**
+ * After in-app navigation, re-initialize carousels and widgets inside #spa-content only.
+ * Full script.js is not reloaded (avoids duplicate jQuery handlers on header/footer).
+ */
+(function ($) {
+    'use strict';
+
+    if (!$ || !$.fn || !$.fn.slick) {
+        return;
+    }
+
+    var slickSelectors = [
+        '.main-slider-active', '.slider-two-active', '.hotel-carousel-active',
+        '.testimonial-active', '.testimonial-thums', '.room-two-active',
+        '.gallery-active', '.testimonial-two-active', '.services-three-slider',
+        '.testimonials-three-slider', '.history-slider-active', '.room-details-images',
+        '.testimonials-four-slider',
+    ];
+
+    function destroySlickIn($root) {
+        slickSelectors.forEach(function (sel) {
+            $root.find(sel).each(function () {
+                var $el = $(this);
+                if ($el.hasClass('slick-initialized')) {
+                    try {
+                        $el.slick('unslick');
+                    } catch (e) {
+                    }
+                }
+            });
+        });
+    }
+
+    function initSlickIn($root) {
+        if ($root.find('.main-slider-active').length) {
+            $root.find('.main-slider-active').slick({
+                infinite: true,
+                arrows: false,
+                dots: true,
+                fade: true,
+                autoplay: true,
+                autoplaySpeed: 5000,
+                pauseOnHover: false,
+                slidesToScroll: 1,
+                slidesToShow: 1,
+                appendDots: '.main-slider-dots',
+            });
+        }
+
+        if ($root.find('.slider-two-active').length) {
+            $root.find('.slider-two-active').slick({
+                infinite: true,
+                arrows: true,
+                dots: false,
+                fade: true,
+                autoplay: true,
+                autoplaySpeed: 5000,
+                pauseOnHover: false,
+                slidesToScroll: 1,
+                slidesToShow: 1,
+                prevArrow: '<button class="prev-arrow"><i class="fas fa-angle-left"></i></button>',
+                nextArrow: '<button class="next-arrow"><i class="fas fa-angle-right"></i></button>',
+            });
+        }
+
+        if ($root.find('.hotel-carousel-active').length) {
+            $root.find('.hotel-carousel-active').slick({
+                dots: true,
+                infinite: true,
+                autoplay: false,
+                autoplaySpeed: 2000,
+                arrows: false,
+                speed: 1000,
+                focusOnSelect: false,
+                slidesToShow: 2,
+                slidesToScroll: 1,
+                responsive: [
+                    { breakpoint: 991, settings: { slidesToShow: 1 } },
+                ],
+            });
+        }
+
+        if ($root.find('.testimonial-active').length) {
+            $root.find('.testimonial-active').slick({
+                dots: true,
+                infinite: true,
+                autoplay: true,
+                autoplaySpeed: 5000,
+                arrows: false,
+                speed: 1000,
+                slidesToShow: 1,
+                slidesToScroll: 1,
+                asNavFor: '.testimonial-thums',
+                appendDots: '.testimonial-dots',
+            });
+        }
+
+        if ($root.find('.testimonial-thums').length) {
+            $root.find('.testimonial-thums').slick({
+                dots: false,
+                infinite: true,
+                autoplay: true,
+                autoplaySpeed: 5000,
+                arrows: false,
+                speed: 1000,
+                vertical: true,
+                slidesToShow: 4,
+                slidesToScroll: 1,
+                focusOnSelect: true,
+                asNavFor: '.testimonial-active',
+            });
+        }
+
+        if ($root.find('.room-two-active').length) {
+            $root.find('.room-two-active').slick({
+                dots: true,
+                infinite: true,
+                autoplay: false,
+                autoplaySpeed: 2000,
+                arrows: false,
+                speed: 1000,
+                focusOnSelect: false,
+                slidesToShow: 3,
+                slidesToScroll: 1,
+                responsive: [
+                    { breakpoint: 991, settings: { slidesToShow: 2 } },
+                    { breakpoint: 767, settings: { slidesToShow: 1 } },
+                ],
+            });
+        }
+
+        if ($root.find('.gallery-active').length) {
+            $root.find('.gallery-active').slick({
+                dots: false,
+                infinite: true,
+                autoplay: true,
+                autoplaySpeed: 2000,
+                arrows: false,
+                speed: 1000,
+                variableWidth: true,
+                focusOnSelect: false,
+                responsive: [
+                    { breakpoint: 1400, settings: { variableWidth: false, slidesToShow: 3 } },
+                    { breakpoint: 767, settings: { variableWidth: false, slidesToShow: 2 } },
+                    { breakpoint: 575, settings: { variableWidth: false, slidesToShow: 1 } },
+                ],
+            });
+        }
+
+        if ($root.find('.testimonial-two-active').length) {
+            $root.find('.testimonial-two-active').slick({
+                dots: true,
+                infinite: true,
+                autoplay: true,
+                autoplaySpeed: 5000,
+                arrows: false,
+                speed: 1000,
+                slidesToShow: 1,
+                slidesToScroll: 1,
+                appendDots: '.testimonial-two-dots',
+            });
+        }
+
+        if ($root.find('.services-three-slider').length) {
+            $root.find('.services-three-slider').slick({
+                dots: true,
+                infinite: true,
+                autoplay: true,
+                autoplaySpeed: 2000,
+                arrows: false,
+                speed: 1000,
+                slidesToShow: 4,
+                variableWidth: false,
+                focusOnSelect: false,
+                responsive: [
+                    { breakpoint: 1200, settings: { variableWidth: false, slidesToShow: 3 } },
+                    { breakpoint: 992, settings: { variableWidth: false, slidesToShow: 2 } },
+                    { breakpoint: 575, settings: { variableWidth: false, slidesToShow: 1 } },
+                ],
+            });
+        }
+
+        if ($root.find('.testimonials-three-slider').length) {
+            $root.find('.testimonials-three-slider').slick({
+                dots: true,
+                infinite: true,
+                autoplay: true,
+                autoplaySpeed: 2000,
+                arrows: false,
+                speed: 1000,
+                slidesToShow: 4,
+                variableWidth: false,
+                focusOnSelect: false,
+                responsive: [
+                    { breakpoint: 1200, settings: { variableWidth: false, slidesToShow: 3 } },
+                    { breakpoint: 992, settings: { variableWidth: false, slidesToShow: 2 } },
+                    { breakpoint: 575, settings: { variableWidth: false, slidesToShow: 1 } },
+                ],
+            });
+        }
+
+        if ($root.find('.history-slider-active').length) {
+            $root.find('.history-slider-active').slick({
+                dots: false,
+                infinite: true,
+                autoplay: true,
+                autoplaySpeed: 2000,
+                arrows: true,
+                speed: 1000,
+                slidesToShow: 4,
+                variableWidth: false,
+                focusOnSelect: false,
+                prevArrow: '<button class="prev-arrow"><i class="fas fa-angle-left"></i></button>',
+                nextArrow: '<button class="next-arrow"><i class="fas fa-angle-right"></i></button>',
+                responsive: [
+                    { breakpoint: 1300, settings: { variableWidth: false, slidesToShow: 3 } },
+                    { breakpoint: 992, settings: { variableWidth: false, slidesToShow: 2 } },
+                    { breakpoint: 575, settings: { variableWidth: false, slidesToShow: 1 } },
+                ],
+            });
+        }
+
+        if ($root.find('.room-details-images').length) {
+            $root.find('.room-details-images').slick({
+                dots: true,
+                infinite: true,
+                autoplay: true,
+                autoplaySpeed: 5000,
+                arrows: false,
+                speed: 1000,
+                slidesToShow: 1,
+                slidesToScroll: 1,
+            });
+        }
+
+        if ($root.find('.testimonials-four-slider').length) {
+            $root.find('.testimonials-four-slider').slick({
+                dots: true,
+                infinite: true,
+                autoplay: true,
+                autoplaySpeed: 5000,
+                arrows: false,
+                speed: 1000,
+                slidesToShow: 1,
+                slidesToScroll: 1,
+                appendDots: '.testimonial-four-dots',
+            });
+        }
+    }
+
+    window.maDestroySlickIn = function (rootEl) {
+        destroySlickIn($(rootEl));
+    };
+
+    window.addEventListener('ma:spa-content', function () {
+        var $c = $('#spa-content');
+        initSlickIn($c);
+
+        if (typeof window.maInitGalleryMasonryIfPresent === 'function') {
+            window.maInitGalleryMasonryIfPresent();
+        }
+
+        if (window.maWow && typeof window.maWow.sync === 'function') {
+            window.maWow.sync();
+        }
+
+        $c.find('select').each(function () {
+            var $s = $(this);
+            if ($s.next('.nice-select').length) {
+                try {
+                    $s.niceSelect('destroy');
+                } catch (e) {
+                }
+            }
+        });
+        if ($.fn.niceSelect) {
+            $c.find('select').niceSelect();
+        }
+
+        if ($.fn.magnificPopup) {
+            $c.find('.video-play').magnificPopup({ type: 'video' });
+            $c.find('.video-play-text').magnificPopup({ type: 'video' });
+            $c.find('.instagram-item .instagram-gallery').magnificPopup({
+                type: 'image',
+                gallery: { enabled: true, navigateByImgClick: true },
+            });
+        }
+    });
 })(window.jQuery);
 
 

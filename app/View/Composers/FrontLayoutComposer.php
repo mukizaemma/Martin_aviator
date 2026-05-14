@@ -5,17 +5,23 @@ namespace App\View\Composers;
 use App\Models\About;
 use App\Models\Facility;
 use App\Models\Setting;
+use App\Support\FrontendPageCache;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class FrontLayoutComposer
 {
+    public const CACHE_KEY_SETTING = 'front_layout.setting';
+
+    public const CACHE_KEY_ABOUT = 'front_layout.about';
+
     public function compose(View $view): void
     {
         $data = $view->getData();
 
         $setting = $data['setting'] ?? null;
         if ($setting === null) {
-            $setting = Setting::first();
+            $setting = Cache::remember(self::CACHE_KEY_SETTING, 300, fn () => Setting::query()->first());
         }
         if ($setting === null) {
             $setting = (object) [
@@ -62,7 +68,7 @@ class FrontLayoutComposer
 
         $about = $data['about'] ?? null;
         if ($about === null) {
-            $about = About::first();
+            $about = Cache::remember(self::CACHE_KEY_ABOUT, 300, fn () => About::query()->first());
         }
         if ($about === null) {
             $about = (object) [
@@ -87,7 +93,10 @@ class FrontLayoutComposer
         $view->with('about', $about);
 
         if (! array_key_exists('facilities', $data) || $data['facilities'] === null) {
-            $view->with('facilities', Facility::orderBy('created_at', 'asc')->paginate(6));
+            $view->with('facilities', Cache::remember(FrontendPageCache::FOOTER_FACILITIES, 300, fn () => Facility::query()
+                ->orderBy('created_at', 'asc')
+                ->limit(12)
+                ->get()));
         }
     }
 }

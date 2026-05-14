@@ -13,14 +13,14 @@
                             </li>
                             <li>
                                 <i class="far fa-calendar-alt"></i>
-                                <a href="#">{{ $blog->published_at->format('d M, Y') }}</a>
+                                <a href="#">{{ optional($blog->published_at)->format('d M, Y') }}</a>
                             </li>
                         </ul>
                     </div>
                     <div class="blog-content">
-                        <h4><a href="blog-details.html">Knowing Business & Priorities</a></h4>
+                        <h4><a href="{{ route('blog', ['slug' => $blog->slug]) }}">{{ $blog->title }}</a></h4>
                         <p>Perspiciatis omniste voluptate accusantiume doloremque laudantium, totam aperiam</p>
-                        <a class="read-more" href="blog-details.html">Read More <i class="fal fa-angle-right"></i></a>
+                        <a class="read-more" href="{{ route('blog', ['slug' => $blog->slug]) }}">Read More <i class="fal fa-angle-right"></i></a>
                     </div>
                 </div>
             </div>

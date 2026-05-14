@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\FrontendPageCache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -13,6 +14,17 @@ class Room extends Model
     protected $table = 'rooms';
 
     protected $fillable = ['roomName', 'category', 'image', 'slug', 'price', 'price_rwf', 'size', 'quantity', 'maxAdults', 'maxChildren', 'description'];
+
+    protected static function booted(): void
+    {
+        static::saved(static function () {
+            FrontendPageCache::forgetHomePage();
+        });
+
+        static::deleted(static function () {
+            FrontendPageCache::forgetHomePage();
+        });
+    }
 
     protected $casts = [
         'price' => 'decimal:2',
