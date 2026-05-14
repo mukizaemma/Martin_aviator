@@ -58,4 +58,29 @@ class Currency
     {
         return self::formatUsdWithLocal($usd, null, $rate);
     }
+
+    /**
+     * Plain-text price for select option labels and similar (no HTML).
+     */
+    public static function formatRoomPriceLabel(float|string|null $usd, float|string|null $rwfStored = null): string
+    {
+        if ($usd === null || $usd === '') {
+            return 'Price on request';
+        }
+
+        $usd = (float) $usd;
+        $usdFmt = '$'.number_format($usd, $usd == floor($usd) ? 0 : 2);
+        $label = $usdFmt.' / night';
+
+        if ($rwfStored !== null && $rwfStored !== '' && (float) $rwfStored > 0) {
+            $rwfFmt = number_format((float) $rwfStored, 0, '.', ',');
+
+            return $label.' · ≈ '.$rwfFmt.' RWF';
+        }
+
+        $rwfApprox = self::usdToRwf($usd);
+        $rwfFmt = number_format($rwfApprox, 0, '.', ',');
+
+        return $label.' · ≈ '.$rwfFmt.' RWF';
+    }
 }

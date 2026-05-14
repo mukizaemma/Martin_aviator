@@ -98,7 +98,7 @@ class GuestBookingController extends Controller
 
     public function confirmation(string $publicId): View|Response
     {
-        $booking = GuestBookingRequest::where('public_id', $publicId)->firstOrFail();
+        $booking = GuestBookingRequest::with('room')->where('public_id', $publicId)->firstOrFail();
         if ($booking->fulfillment_choice !== 'pay_on_delivery') {
             abort(404);
         }
@@ -108,7 +108,7 @@ class GuestBookingController extends Controller
 
     public function openWhatsapp(Request $request, string $publicId): RedirectResponse
     {
-        $booking = GuestBookingRequest::where('public_id', $publicId)->firstOrFail();
+        $booking = GuestBookingRequest::with('room')->where('public_id', $publicId)->firstOrFail();
         if ($booking->fulfillment_choice !== 'pay_on_delivery') {
             abort(404);
         }
@@ -129,7 +129,7 @@ class GuestBookingController extends Controller
 
     public function emailInstructions(Request $request, string $publicId): View|Response
     {
-        $booking = GuestBookingRequest::where('public_id', $publicId)->firstOrFail();
+        $booking = GuestBookingRequest::with('room')->where('public_id', $publicId)->firstOrFail();
         if ($booking->fulfillment_choice !== 'pay_on_delivery') {
             abort(404);
         }
@@ -152,7 +152,7 @@ class GuestBookingController extends Controller
     {
         abort_unless(in_array($which, ['booking_com', 'expedia'], true), 404);
 
-        $booking = GuestBookingRequest::where('public_id', $publicId)->firstOrFail();
+        $booking = GuestBookingRequest::with('room')->where('public_id', $publicId)->firstOrFail();
         $url = $which === 'expedia'
             ? (Setting::first()->url_expedia ?? '')
             : (Setting::first()->url_booking ?? '');
