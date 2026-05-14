@@ -4,41 +4,15 @@
 
     @include('frontend.includes.page-header', [
         'title' => 'Get in touch',
-        'subtitle' => null,
+        'subtitle' => 'Choose how you would like to reach us or book — no contact form required.',
         'imageUrl' => ! empty($about->middleImage ?? null)
             ? asset('storage/images/gallery/' . ltrim($about->middleImage, '/'))
             : null,
     ])
 
-        <!-- Contact Form Area start -->
         <section id="airport-transfer" class="contact-page-area py-100 rpy-80 rel z-1" tabindex="-1">
             <div class="container">
-                <div class="row">
-                    @if (session()->has('success'))
-                        <div class="arlert alert-success">
-                            <button class="close" type="button" data-dismiss="alert">X</button>
-                            {{ session()->get('success') }}
-                        </div>
-                    @endif
-                    @if (session()->has('error'))
-                        <div class="arlert alert-danger">
-                            <button class="close" type="button" data-dismiss="alert">X</button>
-                            {{ session()->get('error') }}
-                        </div>
-                    @endif
-                </div>
-
-                <div class="row justify-content-center mb-55">
-                    <div class="col-xl-8 col-lg-10 text-center">
-                        <div class="section-title mb-10 wow fadeInUp delay-0-2s">
-                            <span class="sub-title mb-15">Contact us</span>
-                            <h2>Need help booking a room?</h2>
-                            <p class="mb-0 text-muted">Reach us by phone, email, or the form below — we reply as soon as we can.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row g-4 justify-content-center mb-60 wow fadeInUp delay-0-2s">
+                <div class="row g-4 justify-content-center mb-55 wow fadeInUp delay-0-2s">
                     <div class="col-md-4">
                         <div class="contact-info-item justify-content-center flex-column text-center border rounded-3 py-4 px-3 h-100 bg-white shadow-sm">
                             <div class="icon mx-auto mb-15">
@@ -78,56 +52,15 @@
                     </div>
                 </div>
 
-                <div class="row justify-content-center">
-                    <div class="col-xl-8 col-lg-10">
-                        <div class="contact-page-form wow fadeInUp delay-0-2s">
-                            <div class="section-title mb-15 text-center">
-                                <h3>Send us a message</h3>
-                                <p class="mb-0">Your email address will not be published. Required fields are marked *</p>
+                <div class="row justify-content-center mb-55 wow fadeInUp delay-0-2s">
+                    <div class="col-xl-10 col-lg-11">
+                        <div class="border rounded-3 p-4 p-md-5 bg-white shadow-sm">
+                            <div class="section-title mb-25 text-center">
+                                <span class="sub-title mb-10">Book or message us</span>
+                                <h2 class="mb-0">Choose your channel</h2>
+                                <p class="text-muted mt-3 mb-0">Book directly on our site, on a partner OTA, or reach the team on WhatsApp or email.</p>
                             </div>
-
-                            <form id="contactForm" class="contactForm" action="{{ route('sendMessage') }}" method="POST" enctype="multipart/form-data">
-                                @csrf
-
-                                <div class="row gap-20 pt-15">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <input type="text" id="name" name="names" class="form-control" value="" placeholder="Full name" required data-error="Please enter your name">
-                                            <div class="help-block with-errors"></div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <input type="text" id="phone_number" name="phone" class="form-control" value="" placeholder="Phone" required data-error="Please enter your Phone">
-                                            <div class="help-block with-errors"></div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <input type="email" id="email" name="email" class="form-control" value="" placeholder="Email" required data-error="Please enter your Email">
-                                            <div class="help-block with-errors"></div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <input type="text" id="subject" name="subject" class="form-control" value="" placeholder="Subject" required data-error="Please enter your Subject">
-                                            <div class="help-block with-errors"></div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <div class="form-group">
-                                            <textarea name="message" id="message" class="form-control" rows="3" placeholder="Message" required data-error="Please enter your Message"></textarea>
-                                            <div class="help-block with-errors"></div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <div class="form-group pt-5 mb-0 text-center">
-                                            <button type="submit" class="theme-btn">Send message<i class="far fa-arrow-right"></i></button>
-                                            <div id="msgSubmit" class="hidden"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </form>
+                            @include('frontend.includes.booking-channels-grid')
                         </div>
                     </div>
                 </div>
@@ -140,13 +73,10 @@
                <span></span><span></span>
             </div>
         </section>
-        <!-- Contact Form Area end -->
 
-
-        <!-- Location Map Area Start -->
         <div class="contact-page-map pb-120 rpb-90 wow fadeInUp delay-0-2s">
             <div class="container-fluid">
-                <div class="our-location">
+                <div class="our-location ma-map-embed">
                     @if (! empty($setting->google_map_embed))
                         {!! $setting->google_map_embed !!}
                     @else
@@ -155,7 +85,5 @@
                 </div>
             </div>
         </div>
-        <!-- Location Map Area End -->
-
 
 @endsection

@@ -243,23 +243,23 @@
 
                                         {{-- OTAs & map --}}
                                         <div class="tab-pane fade" id="tab-otas" role="tabpanel">
-                                            <p class="text-muted small mb-4">Link your property on major channels. Use full URLs (including <code>https://</code>).</p>
+                                            <p class="text-muted small mb-4"><strong>Book on OTA</strong> uses Booking.com and Expedia only. <strong>Reviews</strong> use TripAdvisor and Google Business Profile. Use full URLs (including <code>https://</code>).</p>
                                             <div class="row g-3">
                                                 <div class="col-12">
-                                                    <label class="form-label" for="url_booking">Booking.com</label>
+                                                    <label class="form-label" for="url_booking">Booking.com (book on OTA)</label>
                                                     <input type="url" class="form-control" id="url_booking" name="url_booking" value="{{ old('url_booking', $data->url_booking ?? '') }}" placeholder="https://www.booking.com/hotel/...">
                                                 </div>
                                                 <div class="col-12">
-                                                    <label class="form-label" for="url_tripadvisor">TripAdvisor</label>
+                                                    <label class="form-label" for="url_expedia">Expedia (book on OTA)</label>
+                                                    <input type="url" class="form-control" id="url_expedia" name="url_expedia" value="{{ old('url_expedia', $data->url_expedia ?? '') }}" placeholder="https://www.expedia.com/...">
+                                                </div>
+                                                <div class="col-12">
+                                                    <label class="form-label" for="url_tripadvisor">TripAdvisor (reviews)</label>
                                                     <input type="url" class="form-control" id="url_tripadvisor" name="url_tripadvisor" value="{{ old('url_tripadvisor', $data->url_tripadvisor ?? '') }}" placeholder="https://www.tripadvisor.com/...">
                                                 </div>
                                                 <div class="col-12">
-                                                    <label class="form-label" for="url_google_business">Google Business Profile</label>
+                                                    <label class="form-label" for="url_google_business">Google Business Profile (reviews)</label>
                                                     <input type="url" class="form-control" id="url_google_business" name="url_google_business" value="{{ old('url_google_business', $data->url_google_business ?? '') }}" placeholder="https://g.page/... or Maps link">
-                                                </div>
-                                                <div class="col-12">
-                                                    <label class="form-label" for="url_expedia">Expedia</label>
-                                                    <input type="url" class="form-control" id="url_expedia" name="url_expedia" value="{{ old('url_expedia', $data->url_expedia ?? '') }}" placeholder="https://www.expedia.com/...">
                                                 </div>
                                             </div>
 

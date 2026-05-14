@@ -61,7 +61,11 @@
             <a class="nav-link" href="{{route('bookings')}}">
                 <div class="sb-nav-link-icon"><i class="far fa-heart"></i></div>
                 Reservations
-            </a>             
+            </a>
+            <a class="nav-link" href="{{ route('guestInsights') }}">
+                <div class="sb-nav-link-icon"><i class="fas fa-chart-line"></i></div>
+                Guest insights
+            </a>
             <a class="nav-link" href="https://analytics.google.com/" target="_blank">
                 <div class="sb-nav-link-icon"><i class="fa fa-globe"></i></div>
                 Google Analytics

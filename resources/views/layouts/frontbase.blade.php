@@ -11,6 +11,7 @@
     <meta name="description" content="{{ $setting->keywords ?? '' }}">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="theme-color" content="#e89b00">
 
     <!-- Title -->
@@ -131,7 +132,7 @@
                         
                         <!-- Menu Button -->
                         <div class="menu-btns">
-                           <a href="{{ route('rooms') }}" class="theme-btn style-three">Book Now <i class="far fa-angle-right"></i></a>
+                           <a href="{{ route('room.booking') }}" class="theme-btn style-three">Book Now <i class="far fa-angle-right"></i></a>
                            
                             <!-- menu sidbar -->
                             {{-- <div class="menu-sidebar">
@@ -204,10 +205,10 @@
                         </div>
                     </div>
                     <div class="col-lg-4 col-sm-12">
-                        <div class="col-lg-6">
-                            <h4 class="section-title-sm font-weight-bold mb-6">Our Payment Methods</h4>
-                            <img src="assets\images\payment1.png" alt="Visa Card, Master Card, Mobile Money, ....">
-                            <a href="{{ route('rooms') }}" class="btn btn-outline-secondary mt-4">Book Now</a>
+                        @include('frontend.includes.booking-channels-grid')
+                        <div class="mt-4 pt-3 border-top border-secondary border-opacity-25">
+                            <h4 class="section-title-sm font-weight-bold mb-3">Payment methods</h4>
+                            <img src="{{ asset('assets/images/payment1.png') }}" alt="Accepted cards and mobile money" class="img-fluid">
                         </div>
                     </div>
                 </div>

@@ -31,7 +31,7 @@
                                 <a href="{{ route('singleRoom',['slug'=>$room->slug]) }}">Max Children : {{ $room->maxChildren }}</a>
                             </li>
                         </ul>
-                        <a class="theme-btn style-two" href="{{ route('singleRoom',['slug'=>$room->slug]) }}">Book Now <i class="fal fa-angle-right"></i></a>
+                        <a class="theme-btn style-two" href="{{ route('room.booking', ['room' => $room->slug]) }}">Book Now <i class="fal fa-angle-right"></i></a>
                     </div>
                 </div>
             </div>                        

@@ -53,7 +53,7 @@
         </div>
 
         <div class="text-center mt-45">
-            <a href="{{ route('contact') }}" class="theme-btn">
+            <a href="{{ route('room.booking') }}" class="theme-btn">
                 Book Now <i class="far fa-angle-right"></i>
             </a>
         </div>

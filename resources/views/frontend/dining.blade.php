@@ -136,6 +136,68 @@
         modal = new bootstrap.Modal(modalEl);
     }
 
+    var trackUrl = @json(route('track.analytics'));
+    var guestDiningUrl = @json(route('guest.dining.store'));
+
+    function maSessionId() {
+        try {
+            var k = 'ma_sid';
+            var s = sessionStorage.getItem(k);
+            if (!s) {
+                s = 's_' + Math.random().toString(36).slice(2) + '_' + Date.now();
+                sessionStorage.setItem(k, s);
+            }
+            return s;
+        } catch (err) {
+            return null;
+        }
+    }
+
+    function csrfToken() {
+        var m = document.querySelector('meta[name="csrf-token"]');
+        return m ? m.getAttribute('content') : '';
+    }
+
+    function postTrack(eventKey, properties) {
+        fetch(trackUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken()
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({
+                event_key: eventKey,
+                properties: properties || {},
+                session_id: maSessionId()
+            })
+        }).catch(function () {});
+    }
+
+    function postDiningSubmission(channel, plainMessage) {
+        var items = cart.map(function (l) {
+            return { title: l.title, qty: l.qty, priceUsd: l.priceUsd, notes: l.notes || '', priceRwf: l.priceRwf || '' };
+        });
+        var gt = cartGrandTotals().sumUsd;
+        return fetch(guestDiningUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken()
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({
+                channel: channel,
+                message_body: plainMessage,
+                items: items,
+                grand_total_usd: gt.toFixed(2),
+                session_id: maSessionId()
+            })
+        }).catch(function () {});
+    }
+
     var elJson = document.getElementById('dining-menu-data');
     var columns = [];
     try {
@@ -516,6 +578,7 @@
         cart.push({ id: id, title: title, priceUsd: priceUsd, priceRwf: priceRwf, qty: qty, notes: notes });
         if (modal) modal.hide();
         refreshDock();
+        postTrack('dining_cart_item_added', { qty: qty });
     });
     document.getElementById('dining-order-clear').addEventListener('click', function () {
         cart = [];
@@ -530,8 +593,10 @@
             alert('WhatsApp ordering is unavailable (no hotel phone on file). Please try email or call the hotel directly.');
             return;
         }
-        var text = encodeURIComponent(buildMessage());
-        window.open('https://wa.me/' + cfg.wa + '?text=' + text, '_blank');
+        var plain = buildMessage();
+        postDiningSubmission('whatsapp', plain).finally(function () {
+            window.open('https://wa.me/' + cfg.wa + '?text=' + encodeURIComponent(plain), '_blank');
+        });
     });
     document.getElementById('dining-order-email').addEventListener('click', function () {
         if (!cart.length) {
@@ -542,9 +607,12 @@
             alert('Email ordering is unavailable (no hotel email on file). Please try WhatsApp or call the hotel directly.');
             return;
         }
-        var sub = encodeURIComponent('Dining order — ' + cfg.hotel);
-        var body = encodeURIComponent(buildMessage());
-        window.location.href = 'mailto:' + cfg.email + '?subject=' + sub + '&body=' + body;
+        var plain = buildMessage();
+        postDiningSubmission('email', plain).finally(function () {
+            var sub = encodeURIComponent('Dining order — ' + cfg.hotel);
+            var body = encodeURIComponent(plain);
+            window.location.href = 'mailto:' + cfg.email + '?subject=' + sub + '&body=' + body;
+        });
     });
     load();
     refreshDock();

@@ -1442,6 +1442,17 @@ h6,
   color: #333;
 }
 
-.dining-modal .modal-content {
-  border-radius: 14px;
+.ma-map-embed iframe {
+  width: 100% !important;
+  min-height: 420px;
+  display: block;
+  border: 0;
+}
+
+.ma-room-booking__option {
+  cursor: pointer;
+}
+
+.ma-room-booking__option input {
+  vertical-align: middle;
 }

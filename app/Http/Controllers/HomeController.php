@@ -573,4 +573,20 @@ class HomeController extends Controller
 
         return view('frontend.restaurant', ['gallery' => $gallery]);
     }
+
+    /**
+     * Legacy route: redirect to the unified booking form.
+     */
+    public function reserveRoom(string $slug)
+    {
+        return redirect()->route('room.booking', ['room' => $slug]);
+    }
+
+    /**
+     * Legacy route: redirect to the unified booking form.
+     */
+    public function saveBookings(Request $request)
+    {
+        return redirect()->route('room.booking')->with('info', 'Please use the booking form to send your room request.');
+    }
 }

@@ -1,15 +1,20 @@
 <?php
 
+use App\Http\Controllers\Admin\GuestInsightsController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\DiningController;
+use App\Http\Controllers\DirectPayPlaceholderController;
 use App\Http\Controllers\FacilitiesController;
 use App\Http\Controllers\GalleryController;
+use App\Http\Controllers\GuestBookingController;
+use App\Http\Controllers\GuestDiningSubmissionController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PartnersController;
 use App\Http\Controllers\RoomsController;
 use App\Http\Controllers\ServicesController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\SiteAnalyticsController;
 use App\Http\Controllers\SlidesController;
 use Illuminate\Support\Facades\Route;
 
@@ -35,6 +40,17 @@ Route::get('/reserve/{slug}', [HomeController::class, 'reserveRoom'])->name('res
 Route::post('/saveBookings', [HomeController::class, 'saveBookings'])->name('saveBookings');
 Route::get('/facilities', [HomeController::class, 'facilities'])->name('facilities');
 Route::get('/dining', [HomeController::class, 'dining'])->name('dining');
+
+Route::get('/book-room', [GuestBookingController::class, 'create'])->name('room.booking');
+Route::post('/book-room', [GuestBookingController::class, 'store'])->middleware('throttle:25,1')->name('room.booking.store');
+Route::get('/book-room/confirmation/{publicId}', [GuestBookingController::class, 'confirmation'])->name('room.booking.confirmation');
+Route::get('/book-room/open-whatsapp/{publicId}', [GuestBookingController::class, 'openWhatsapp'])->name('room.booking.whatsapp');
+Route::get('/book-room/email-instructions/{publicId}', [GuestBookingController::class, 'emailInstructions'])->name('room.booking.email');
+Route::get('/book-room/ota/{publicId}/{which}', [GuestBookingController::class, 'otaRedirect'])->name('room.booking.ota');
+Route::get('/pay/dpo', DirectPayPlaceholderController::class)->name('pay.dpo');
+Route::post('/track/analytics', [SiteAnalyticsController::class, 'store'])->middleware('throttle:180,1')->name('track.analytics');
+Route::post('/guest/dining-submission', [GuestDiningSubmissionController::class, 'store'])->middleware('throttle:60,1')->name('guest.dining.store');
+
 Route::get('/facilities/{slug}', [HomeController::class, 'facilitySingle'])->name('facilitySingle');
 Route::get('/restaurant', [HomeController::class, 'restaurant'])->name('restaurant');
 Route::get('/Gallery', [HomeController::class, 'gallery'])->name('gallery');
@@ -47,8 +63,7 @@ Route::get('/airport-transfer', function () {
     return redirect()->to(route('contact').'#airport-transfer');
 })->name('airportTransfer');
 
-Route::post('/sendMessage', [HomeController::class, 'sendMessage'])->name('sendMessage');
-Route::post('/bookRoom/{id}', [HomeController::class, 'bookRoom'])->name('bookRoom');
+Route::post('/sendMessage', [HomeController::class, 'SendMessage'])->name('sendMessage');
 
 // Route::middleware(['normalUser'])->group(function () {
 Route::get('/MyCart', [HomeController::class, 'showCart'])->name('showCart');
@@ -59,6 +74,8 @@ Route::post('confirmOrder', [HomeController::class, 'confirmOrder'])->name('conf
 Route::middleware(['auth', 'admin'])->group(function () {
 
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
+
+    Route::get('/guest-insights', [GuestInsightsController::class, 'index'])->name('guestInsights');
 
     Route::get('/setting', [SettingController::class, 'setting'])->name('setting');
     Route::post('/saveSetting', [SettingController::class, 'saveSetting'])->name('saveSetting');

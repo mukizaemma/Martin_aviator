@@ -97,45 +97,12 @@
     <!-- Room Details End -->
 
     <div class="container py-5 mb-50">
-        <div class="row justify-content-center">
-            <div class="col-xl-6 col-lg-8 col-md-10 col-sm-12" style="padding: 24px; background-color: #f9f9f9; color: #333; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                <h3>Reserve this room now</h3>
-                <form class="form" action="{{ route('reserveNow') }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 12px;">
-                    @csrf
-    
-                    <div class="row">
-                        <div class="col-xl-3 col-sm-12" style="margin-bottom: 12px;">
-                            <label for="">Check-in Date</label>
-                            <input type="hidden" name="room_id" value="{{ $room->id }}">
-                            <input type="date" name="checkin" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
-                        </div>
-                        <div class="col-xl-3 col-sm-12" style="margin-bottom: 12px;">
-                            <label for="">Check-out Date</label>
-                            <input type="date" name="checkout" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
-                        </div>
-                        <div class="col-xl-3 col-sm-12" style="margin-bottom: 12px;">
-                            <label for="">Number of Guests</label>
-                            <input type="number" name="adults" value="1" min="1" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; margin-bottom: 12px;">
-                        </div>
-                        <div class="col-xl-3 col-sm-12" style="margin-bottom: 12px;">
-                            <label for="">Number of Rooms</label>
-                            <input type="number" name="rooms" value="1" min="1" max="4" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; margin-bottom: 12px;">
-                        </div>
-                    </div>
-                
-                    <input type="text" name="names" placeholder="Your Names" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; margin-bottom: 12px;">
-                    <input type="email" name="email" placeholder="Email" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; margin-bottom: 12px;">
-                    <input type="text" name="phone" placeholder="Phone" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; margin-bottom: 12px;">
-                    <input type="text" name="address" placeholder="Address, Country, City" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; margin-bottom: 12px;">
-    
-                    <textarea name="description" placeholder="Any Special Request? (Optional)" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; margin-bottom: 12px; height: 80px;"></textarea>
-    
-                    <div class="row d-flex justify-content-center align-items-center gap-2" style="padding: 5px;">
-                        <button type="submit" class="tp-btn btn btn-primary" style="width:20%; padding: 12px; border-radius: 4px; font-size: 1rem;">Submit</button>
-                        <a href="{{route('rooms')}}" class="btn btn-secondary" style="width:40%; padding: 12px; border-radius: 4px; font-size: 1rem;">Back to all Rooms</a>
-                    </div>
-    
-                </form>
+        <div class="row justify-content-center text-center">
+            <div class="col-lg-8">
+                <h3 class="mb-3">Reserve this room</h3>
+                <p class="text-muted mb-4">Choose your dates, airport transfers, and how you would like to pay or complete your booking. Your request is saved for the hotel in the same format as WhatsApp or email.</p>
+                <a href="{{ route('room.booking', ['room' => $room->slug]) }}" class="theme-btn">Book this room <i class="far fa-angle-right ms-2"></i></a>
+                <a href="{{ route('rooms') }}" class="theme-btn style-three ms-2 mt-2 mt-sm-0 d-inline-block">All rooms</a>
             </div>
         </div>
     </div>

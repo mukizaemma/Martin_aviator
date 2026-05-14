@@ -3,6 +3,7 @@
 namespace App\View\Composers;
 
 use App\Models\About;
+use App\Models\Facility;
 use App\Models\Setting;
 use Illuminate\View\View;
 
@@ -50,6 +51,11 @@ class FrontLayoutComposer
                 'flexible_stay_card3_title' => '',
                 'flexible_stay_card3_text' => '',
                 'flexible_stay_card3_icon' => '',
+                'url_booking' => '',
+                'url_expedia' => '',
+                'url_tripadvisor' => '',
+                'url_google_business' => '',
+                'google_map_embed' => '',
             ];
         }
         $view->with('setting', $setting);
@@ -81,7 +87,7 @@ class FrontLayoutComposer
         $view->with('about', $about);
 
         if (! array_key_exists('facilities', $data) || $data['facilities'] === null) {
-            $view->with('facilities', collect());
+            $view->with('facilities', Facility::orderBy('created_at', 'asc')->paginate(6));
         }
     }
 }
