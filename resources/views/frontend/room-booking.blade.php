@@ -4,9 +4,20 @@
 
 @include('frontend.includes.page-header', [
     'title' => 'Book a stay',
-    'subtitle' => 'Tell us your dates and how you would like to pay or complete the booking. Your details are stored for the hotel team and match what you send by WhatsApp or email.',
+    'subtitle' => 'First choose how you want to book, then complete your stay details.',
     'imageUrl' => null,
 ])
+
+@php
+    $selectedChannel = old('fulfillment_choice', $selectedChannel ?? '');
+    $channelLabels = [
+        'direct_pay' => 'Book and pay directly',
+        'whatsapp' => 'Book through WhatsApp',
+        'email' => 'Book through email',
+        'booking_com' => 'Booking.com',
+        'expedia' => 'Expedia',
+    ];
+@endphp
 
 <section class="ma-room-booking py-100 rpy-70 bg-white rel z-1">
     <div class="container">
@@ -25,8 +36,23 @@
                     <div class="alert alert-info">{{ session('info') }}</div>
                 @endif
 
-                <form method="post" action="{{ route('room.booking.store') }}" class="ma-room-booking__form border rounded-3 p-4 p-md-4 bg-light shadow-sm">
+                <div id="rb-step-channels" class="ma-room-booking__step {{ $selectedChannel ? 'd-none' : '' }}">
+                    <h2 class="h4 mb-3">How would you like to book?</h2>
+                    @include('frontend.includes.booking-channels-grid', ['compact' => true])
+                    <p class="small text-muted mt-3 mb-0">After you pick an option above, you will complete your dates and contact details on the next screen.</p>
+                </div>
+
+                <form method="post" action="{{ route('room.booking.store') }}" class="ma-room-booking__form border rounded-3 p-4 p-md-4 bg-light shadow-sm {{ $selectedChannel ? '' : 'd-none' }}" id="rb-step-form">
                     @csrf
+                    <input type="hidden" name="fulfillment_choice" id="rb-fulfillment-hidden" value="{{ $selectedChannel }}">
+
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+                        <div>
+                            <span class="text-muted small d-block">Booking via</span>
+                            <strong id="rb-channel-label">{{ $channelLabels[$selectedChannel] ?? '' }}</strong>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="rb-change-channel">Change option</button>
+                    </div>
 
                     <h3 class="h5 mb-3">Stay details</h3>
                     <div class="row g-3 mb-4">
@@ -36,7 +62,7 @@
                                 <option value="">Let the hotel suggest a room</option>
                                 @foreach ($rooms as $r)
                                     <option value="{{ $r->id }}" @selected((int) ($selectedRoomId ?? 0) === (int) $r->id)>
-                                        {{ $r->roomName }} — {{ \App\Support\Currency::formatRoomPriceLabel($r->price, $r->price_rwf) }}
+                                        {{ $r->roomName }} — {{ \App\Support\Currency::formatRoomPriceLabel($r->price) }}
                                     </option>
                                 @endforeach
                             </select>
@@ -104,49 +130,64 @@
                         </div>
                     </div>
 
-                    <h3 class="h5 mb-3">How would you like to complete this booking?</h3>
-                    <p class="small text-muted mb-2" id="rb-fulfillment-help">Choose <strong>one</strong> option to continue. You must select a method before submitting.</p>
-                    <fieldset class="border-0 p-0 m-0" aria-required="true" aria-describedby="rb-fulfillment-help">
-                        <legend class="visually-hidden">Booking completion method</legend>
-                        <div class="row g-3 mb-4">
-                        <div class="col-md-6">
-                            <label class="ma-room-booking__option border rounded-3 p-3 h-100 d-block bg-white">
-                                <input type="radio" name="fulfillment_choice" value="direct_pay" id="rb-fulfill-direct" class="form-check-input me-2" required @checked(old('fulfillment_choice') === 'direct_pay')>
-                                <strong>Direct pay</strong>
-                                <span class="d-block small text-muted mt-1">Secure card payment via DPO will be available here soon. You will land on the payment information page.</span>
-                            </label>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="ma-room-booking__option border rounded-3 p-3 h-100 d-block bg-white">
-                                <input type="radio" name="fulfillment_choice" value="pay_on_delivery" id="rb-fulfill-arrival" class="form-check-input me-2" @checked(old('fulfillment_choice') === 'pay_on_delivery')>
-                                <strong>Pay on arrival</strong>
-                                <span class="d-block small text-muted mt-1">We save your request. On the next screen, choose WhatsApp or email to send it to the hotel.</span>
-                            </label>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="ma-room-booking__option border rounded-3 p-3 h-100 d-block bg-white">
-                                <input type="radio" name="fulfillment_choice" value="booking_com" id="rb-fulfill-bc" class="form-check-input me-2" @checked(old('fulfillment_choice') === 'booking_com')>
-                                <strong>Booking.com</strong>
-                                <span class="d-block small text-muted mt-1">We open your property listing in a new tab. Add this site’s dates in Booking.com’s flow.</span>
-                            </label>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="ma-room-booking__option border rounded-3 p-3 h-100 d-block bg-white">
-                                <input type="radio" name="fulfillment_choice" value="expedia" id="rb-fulfill-exp" class="form-check-input me-2" @checked(old('fulfillment_choice') === 'expedia')>
-                                <strong>Expedia</strong>
-                                <span class="d-block small text-muted mt-1">We open Expedia in a new tab. Complete booking there.</span>
-                            </label>
-                        </div>
-                        </div>
-                    </fieldset>
-
                     <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center pt-2">
                         <p class="small text-muted mb-0">By continuing you agree your request may be stored for hotel operations.</p>
-                        <button type="submit" class="theme-btn">Continue <i class="far fa-angle-right ms-2"></i></button>
+                        <button type="submit" class="theme-btn">Submit booking request <i class="far fa-angle-right ms-2"></i></button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </section>
+
+<script>
+(function () {
+    var labels = @json($channelLabels);
+    var stepChannels = document.getElementById('rb-step-channels');
+    var stepForm = document.getElementById('rb-step-form');
+    var hidden = document.getElementById('rb-fulfillment-hidden');
+    var labelEl = document.getElementById('rb-channel-label');
+    var changeBtn = document.getElementById('rb-change-channel');
+
+    function showForm(channel) {
+        if (!channel || !labels[channel]) return;
+        hidden.value = channel;
+        labelEl.textContent = labels[channel];
+        stepChannels.classList.add('d-none');
+        stepForm.classList.remove('d-none');
+        try {
+            var u = new URL(window.location.href);
+            u.searchParams.set('channel', channel);
+            window.history.replaceState({}, '', u);
+        } catch (e) {}
+    }
+
+    document.querySelectorAll('.ma-book-channels a[href*="channel="]').forEach(function (a) {
+        a.addEventListener('click', function (e) {
+            var m = a.href.match(/channel=([a-z_]+)/);
+            if (!m) return;
+            if (m[1] === 'direct_pay') return;
+            e.preventDefault();
+            showForm(m[1]);
+        });
+    });
+
+    if (changeBtn) {
+        changeBtn.addEventListener('click', function () {
+            stepForm.classList.add('d-none');
+            stepChannels.classList.remove('d-none');
+            hidden.value = '';
+        });
+    }
+
+    function initFromQuery() {
+        var p = new URLSearchParams(window.location.search);
+        var ch = p.get('channel') || hidden.value;
+        if (ch && labels[ch] && ch !== 'direct_pay') showForm(ch);
+    }
+
+    document.addEventListener('ma:spa-content', initFromQuery);
+    initFromQuery();
+})();
+</script>
 @endsection

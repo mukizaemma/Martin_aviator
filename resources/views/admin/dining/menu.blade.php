@@ -35,6 +35,7 @@
                             <div class="col-md-3"><label class="form-label">Title</label><input type="text" name="title" class="form-control" required></div>
                             <div class="col-md-2"><label class="form-label">Price (USD)</label><input type="number" step="0.01" min="0" name="price_usd" class="form-control" required></div>
                             <div class="col-md-2"><label class="form-label">Price (RWF)</label><input type="number" step="1" min="0" name="price_rwf" class="form-control" placeholder="Optional"></div>
+                            <div class="col-md-2"><label class="form-label">Prep (min)</label><input type="number" step="1" min="1" max="600" name="prep_minutes" class="form-control" placeholder="Optional"></div>
                             <div class="col-md-2"><label class="form-label">Category</label>
                                 <select name="menu_category_id" class="form-select">
                                     <option value="">— None —</option>
@@ -65,7 +66,8 @@
                                                     <div class="d-flex flex-wrap gap-2 align-items-center">
                                                         <input type="text" name="title" value="{{ $item->title }}" class="form-control form-control-sm" style="max-width:220px;">
                                                         <input type="number" step="0.01" name="price_usd" value="{{ $item->price_usd }}" class="form-control form-control-sm" style="width:100px;">
-                                                        <input type="number" step="1" name="price_rwf" value="{{ $item->price_rwf }}" class="form-control form-control-sm" style="width:100px;" placeholder="RWF">
+                                                        <input type="number" step="1" name="price_rwf" value="{{ $item->price_rwf }}" class="form-control form-control-sm" style="width:90px;" placeholder="RWF">
+                                                        <input type="number" step="1" min="1" max="600" name="prep_minutes" value="{{ $item->prep_minutes }}" class="form-control form-control-sm" style="width:72px;" placeholder="min" title="Prep minutes">
                                                         <select name="menu_category_id" class="form-select form-select-sm" style="max-width:180px;">
                                                             <option value="">— None —</option>
                                                             @foreach ($categories as $c)

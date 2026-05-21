@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DiningMenuItem extends Model
 {
-    protected $fillable = ['title', 'description', 'price_usd', 'price_rwf', 'image', 'sort_order', 'menu_category_id'];
+    protected $fillable = ['title', 'description', 'price_usd', 'price_rwf', 'prep_minutes', 'image', 'sort_order', 'menu_category_id'];
 
     protected static function booted(): void
     {

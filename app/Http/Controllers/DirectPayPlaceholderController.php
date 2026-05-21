@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Room;
 use App\Models\SiteAnalyticsEvent;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -19,6 +20,11 @@ class DirectPayPlaceholderController extends Controller
             'session_id' => substr(sha1($request->session()->getId()), 0, 40),
         ]);
 
-        return $this->spaView('frontend.pay-dpo-placeholder', [], 'Payment');
+        $room = null;
+        if ($request->filled('room')) {
+            $room = Room::where('slug', $request->query('room'))->first();
+        }
+
+        return $this->spaView('frontend.pay-dpo-placeholder', compact('room'), 'Book and pay');
     }
 }

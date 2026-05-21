@@ -3,8 +3,8 @@
 @section('content')
 
 @include('frontend.includes.page-header', [
-    'title' => 'Dining',
-    'subtitle' => 'Order in a few taps — send your request by WhatsApp or email.',
+    'title' => 'Bar & Restaurant',
+    'subtitle' => 'Browse the menu, add items to your order, and send everything to the hotel on WhatsApp.',
     'imageUrl' => ! empty($setting->dining_hero_image)
         ? asset('storage/images/pages/'.$setting->dining_hero_image)
         : null,
@@ -21,7 +21,16 @@
                 </div>
             @endif
 
-            <p class="text-muted small mb-3 wow fadeInUp">Tap a price for local currency (RWF), or click the price to show or hide RWF next to the dollar amount.</p>
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 wow fadeInUp">
+                <p class="text-muted small mb-0">Prices shown in your chosen currency. Add dishes, set when you need them, and send the full order on WhatsApp.</p>
+                <div class="dining-currency-picker d-flex align-items-center gap-2">
+                    <span class="small fw-semibold">Prices in</span>
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Menu currency">
+                        <button type="button" class="btn btn-outline-secondary active" data-dining-currency="usd" id="dining-cur-usd">USD ($)</button>
+                        <button type="button" class="btn btn-outline-secondary" data-dining-currency="rwf" id="dining-cur-rwf">RWF</button>
+                    </div>
+                </div>
+            </div>
 
             <script type="application/json" id="dining-menu-data">@json($diningMenuColumns)</script>
             <div id="dining-menu-columns-app" class="dining-menu-columns-app wow fadeInUp">
@@ -43,11 +52,12 @@
             <div>
                 <strong class="dining-order-dock__label d-block mb-0">Your order</strong>
                 <span id="dining-order-count" class="dining-order-dock__sub small">0 items</span>
+                <span id="dining-order-prep-estimate" class="dining-order-dock__sub small d-block text-warning"></span>
             </div>
             <div class="d-flex flex-wrap gap-2 align-items-end">
                 <div>
-                    <label class="form-label small mb-1" for="dining-global-time">Needed around</label>
-                    <input type="time" class="form-control form-control-sm" id="dining-global-time" style="max-width:9rem">
+                    <label class="form-label small mb-1" for="dining-global-time">Time required <span class="text-danger">*</span></label>
+                    <input type="time" class="form-control form-control-sm" id="dining-global-time" style="max-width:9rem" required aria-required="true">
                 </div>
                 <div>
                     <label class="form-label small mb-1" for="dining-global-party">Party size</label>
@@ -83,10 +93,9 @@
                 </div>
             </div>
             <div class="col-lg-4">
-                <p class="dining-order-dock__sub small mb-3 mb-lg-2">Send this order to the hotel using the phone number (WhatsApp) and email shown below — the same contact details used across this website.</p>
+                <p class="dining-order-dock__sub small mb-3 mb-lg-2">Review your order, set the time you need it, then send everything in one WhatsApp message to the hotel.</p>
                 <div class="d-flex flex-column gap-2">
-                    <button type="button" class="theme-btn btn-sm" id="dining-order-whatsapp"><i class="fab fa-whatsapp me-1"></i> Send via WhatsApp</button>
-                    <button type="button" class="theme-btn style-three btn-sm" id="dining-order-email"><i class="far fa-envelope me-1"></i> Send via email</button>
+                    <button type="button" class="theme-btn btn-sm" id="dining-order-whatsapp"><i class="fab fa-whatsapp me-1"></i> Send order on WhatsApp</button>
                     <button type="button" class="btn btn-outline-light btn-sm" id="dining-order-clear">Clear order</button>
                 </div>
             </div>
@@ -108,8 +117,8 @@
                     <input type="number" class="form-control" id="dining-add-qty" min="1" value="1">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Notes (optional)</label>
-                    <textarea class="form-control" id="dining-add-notes" rows="2" placeholder="No onions, extra sauce…"></textarea>
+                    <label class="form-label">Special request (optional)</label>
+                    <textarea class="form-control" id="dining-add-notes" rows="2" placeholder="No onions, extra sauce, allergies…"></textarea>
                 </div>
                 <button type="button" class="theme-btn w-100 mt-2" id="dining-add-confirm">Add to tray</button>
             </div>
@@ -127,7 +136,9 @@
         displayPhone: @json($setting->phone ?? ''),
         displayEmail: @json(trim($setting->email ?? ''))
     };
+    var CURRENCY_KEY = 'dining_currency';
     var cart = [];
+    var menuCurrency = 'usd';
     var dock = document.getElementById('dining-order-dock');
     var countEl = document.getElementById('dining-order-count');
     var modalEl = document.getElementById('dining-add-modal');
@@ -175,11 +186,37 @@
         }).catch(function () {});
     }
 
+    function getMenuCurrency() {
+        try {
+            var c = localStorage.getItem(CURRENCY_KEY);
+            return c === 'rwf' ? 'rwf' : 'usd';
+        } catch (e) {
+            return 'usd';
+        }
+    }
+
+    function setMenuCurrency(c) {
+        menuCurrency = c === 'rwf' ? 'rwf' : 'usd';
+        try { localStorage.setItem(CURRENCY_KEY, menuCurrency); } catch (e) {}
+        document.querySelectorAll('[data-dining-currency]').forEach(function (btn) {
+            btn.classList.toggle('active', btn.getAttribute('data-dining-currency') === menuCurrency);
+        });
+        columns.forEach(function (_, i) { renderCol(i); });
+        refreshDock();
+    }
+
     function postDiningSubmission(channel, plainMessage) {
         var items = cart.map(function (l) {
-            return { title: l.title, qty: l.qty, priceUsd: l.priceUsd, notes: l.notes || '', priceRwf: l.priceRwf || '' };
+            return {
+                title: l.title,
+                qty: l.qty,
+                priceUsd: l.priceUsd,
+                notes: l.notes || '',
+                priceRwf: l.priceRwf || '',
+                prepMinutes: l.prepMinutes || null
+            };
         });
-        var gt = cartGrandTotals().sumUsd;
+        var gt = cartGrandTotals();
         return fetch(guestDiningUrl, {
             method: 'POST',
             headers: {
@@ -192,7 +229,9 @@
                 channel: channel,
                 message_body: plainMessage,
                 items: items,
-                grand_total_usd: gt.toFixed(2),
+                currency: menuCurrency,
+                grand_total_usd: gt.sumUsd.toFixed(2),
+                grand_total_rwf: gt.sumRwf > 0 ? String(gt.sumRwf) : '',
                 session_id: maSessionId()
             })
         }).catch(function () {});
@@ -308,10 +347,16 @@
                     if (it.descriptionTitle) desc.title = it.descriptionTitle;
                     tdItem.appendChild(desc);
                 }
+                if (it.prepMinutes) {
+                    var prep = document.createElement('div');
+                    prep.className = 'home-dining-mini-table__prep text-muted small mt-1';
+                    prep.innerHTML = '<i class="far fa-clock me-1"></i> ~' + it.prepMinutes + ' min prep';
+                    tdItem.appendChild(prep);
+                }
                 var tdPrice = document.createElement('td');
                 tdPrice.className = 'text-end align-top home-dining-mini-table__price';
                 var ph = document.createElement('div');
-                ph.innerHTML = it.priceHtml || '';
+                ph.innerHTML = menuCurrency === 'rwf' ? (it.priceHtmlRwf || '') : (it.priceHtmlUsd || '');
                 tdPrice.appendChild(ph);
 
                 var tdAct = document.createElement('td');
@@ -323,6 +368,7 @@
                 b.setAttribute('data-title', it.title || '');
                 b.setAttribute('data-price', it.priceUsd || '0');
                 b.setAttribute('data-price-rwf', it.priceRwfAttr || '');
+                b.setAttribute('data-prep-minutes', it.prepMinutes ? String(it.prepMinutes) : '');
                 b.innerHTML = '<i class="fas fa-plus me-1"></i> Add';
                 tdAct.appendChild(b);
 
@@ -395,6 +441,34 @@
         return '$' + v.toFixed(2);
     }
 
+    function moneyRwf(n) {
+        return Math.round(n).toLocaleString('en-US') + ' RWF';
+    }
+
+    function formatLineTotal(t) {
+        if (menuCurrency === 'rwf' && t.lineRwf > 0) {
+            return moneyRwf(t.lineRwf);
+        }
+        return moneyUsd(t.lineUsd);
+    }
+
+    function formatUnitPrice(l) {
+        var unitRwf = parseInt(String(l.priceRwf || '').replace(/\D/g, ''), 10) || 0;
+        if (menuCurrency === 'rwf' && unitRwf > 0) {
+            return moneyRwf(unitRwf);
+        }
+        return moneyUsd(parseFloat(String(l.priceUsd || '0').replace(',', '.')) || 0);
+    }
+
+    function maxPrepMinutes() {
+        var max = 0;
+        cart.forEach(function (l) {
+            var p = parseInt(l.prepMinutes, 10) || 0;
+            if (p > max) max = p;
+        });
+        return max;
+    }
+
     function lineTotals(l) {
         var unit = parseFloat(String(l.priceUsd || '0').replace(',', '.')) || 0;
         var qty = parseInt(l.qty, 10) || 0;
@@ -442,7 +516,13 @@
                 tdItem.appendChild(title);
                 var unitLine = document.createElement('div');
                 unitLine.className = 'text-muted small';
-                unitLine.textContent = moneyUsd(t.unit) + ' each' + (l.priceRwf ? ' · ~' + String(l.priceRwf).replace(/\D/g, '') + ' RWF ea.' : '');
+                unitLine.textContent = formatUnitPrice(l) + ' each';
+                if (l.prepMinutes) {
+                    var prepLine = document.createElement('div');
+                    prepLine.className = 'text-muted small';
+                    prepLine.textContent = '~' + l.prepMinutes + ' min preparation';
+                    tdItem.appendChild(prepLine);
+                }
                 tdItem.appendChild(unitLine);
                 if (l.notes) {
                     var note = document.createElement('div');
@@ -455,13 +535,7 @@
                 tdQty.textContent = String(t.qty);
                 var tdTot = document.createElement('td');
                 tdTot.className = 'text-end fw-semibold text-nowrap';
-                tdTot.textContent = moneyUsd(t.lineUsd);
-                if (t.lineRwf > 0) {
-                    var rwfSub = document.createElement('div');
-                    rwfSub.className = 'text-muted small fw-normal';
-                    rwfSub.textContent = '~' + t.lineRwf.toLocaleString('en-US') + ' RWF';
-                    tdTot.appendChild(rwfSub);
-                }
+                tdTot.textContent = formatLineTotal(t);
                 tr.appendChild(tdItem);
                 tr.appendChild(tdQty);
                 tr.appendChild(tdTot);
@@ -480,14 +554,8 @@
             tdG.className = 'text-end border-0 text-nowrap';
             var strong = document.createElement('strong');
             strong.className = 'text-body';
-            strong.textContent = moneyUsd(gt.sumUsd);
+            strong.textContent = menuCurrency === 'rwf' && gt.sumRwf > 0 ? moneyRwf(gt.sumRwf) : moneyUsd(gt.sumUsd);
             tdG.appendChild(strong);
-            if (gt.sumRwf > 0) {
-                var rwfTot = document.createElement('div');
-                rwfTot.className = 'text-muted small fw-normal';
-                rwfTot.textContent = '~' + gt.sumRwf.toLocaleString('en-US') + ' RWF';
-                tdG.appendChild(rwfTot);
-            }
             trF.appendChild(tdL);
             trF.appendChild(tdG);
             tfoot.appendChild(trF);
@@ -503,12 +571,20 @@
 
     function refreshDock() {
         var n = cart.reduce(function (a, l) { return a + (l.qty || 0); }, 0);
+        var prepEl = document.getElementById('dining-order-prep-estimate');
+        var maxPrep = maxPrepMinutes();
         if (n > 0) {
             dock.classList.remove('d-none');
             countEl.textContent = n + ' item' + (n === 1 ? '' : 's');
+            if (prepEl) {
+                prepEl.textContent = maxPrep
+                    ? ('Estimated kitchen time: ~' + maxPrep + ' min (longest dish)')
+                    : '';
+            }
         } else {
             dock.classList.add('d-none');
             countEl.textContent = '0 items';
+            if (prepEl) prepEl.textContent = '';
         }
         renderOrderSummary();
         save();
@@ -522,7 +598,8 @@
         var gt = cartGrandTotals();
         var sep = '----------------------------------------';
         var lines = [];
-        lines.push('*' + cfg.hotel + ' — dining order*');
+        lines.push('*' + cfg.hotel + ' — Bar & Restaurant order*');
+        lines.push('Currency: ' + (menuCurrency === 'rwf' ? 'RWF' : 'USD'));
         lines.push('');
         lines.push('ORDER LINES');
         lines.push(sep);
@@ -530,16 +607,15 @@
         lines.push(sep);
         cart.forEach(function (l, i) {
             var t = lineTotals(l);
-            var row = (i + 1) + '. ' + (l.title || '') + ' | ' + t.qty + ' | ' + moneyUsd(t.unit) + ' | ' + moneyUsd(t.lineUsd);
+            var row = (i + 1) + '. ' + (l.title || '') + ' | qty ' + t.qty + ' | ' + formatLineTotal(t);
             lines.push(row);
-            if (l.priceRwf) {
-                lines.push('   (unit ~' + String(l.priceRwf).replace(/\D/g, '') + ' RWF ea. · line ~' + (t.lineRwf ? t.lineRwf.toLocaleString('en-US') : '—') + ' RWF)');
-            }
-            if (l.notes) lines.push('   Item note: ' + l.notes);
+            if (l.prepMinutes) lines.push('   Prep: ~' + l.prepMinutes + ' min');
+            if (l.notes) lines.push('   Special request: ' + l.notes);
         });
         lines.push(sep);
-        lines.push('GRAND TOTAL (USD): ' + moneyUsd(gt.sumUsd));
-        if (gt.sumRwf > 0) lines.push('Approx. grand total (RWF): ' + gt.sumRwf.toLocaleString('en-US'));
+        lines.push('GRAND TOTAL: ' + (menuCurrency === 'rwf' && gt.sumRwf > 0 ? moneyRwf(gt.sumRwf) : moneyUsd(gt.sumUsd)));
+        var maxPrep = maxPrepMinutes();
+        if (maxPrep) lines.push('Estimated preparation (longest dish): ~' + maxPrep + ' min');
         lines.push('');
         if (extra) {
             lines.push('ADDITIONAL REQUESTS');
@@ -549,7 +625,7 @@
         }
         lines.push('SERVICE DETAILS');
         lines.push(sep);
-        lines.push('Needed around: ' + (time || '—'));
+        lines.push('Time required: ' + (time || '—'));
         lines.push('Party size: ' + (party || '—'));
         lines.push('');
         lines.push('— Sent from the hotel website dining page.');
@@ -573,9 +649,10 @@
         var title = btn.getAttribute('data-title');
         var priceUsd = btn.getAttribute('data-price');
         var priceRwf = btn.getAttribute('data-price-rwf') || '';
+        var prepMinutes = btn.getAttribute('data-prep-minutes') || '';
         var qty = parseInt(document.getElementById('dining-add-qty').value, 10) || 1;
         var notes = document.getElementById('dining-add-notes').value.trim();
-        cart.push({ id: id, title: title, priceUsd: priceUsd, priceRwf: priceRwf, qty: qty, notes: notes });
+        cart.push({ id: id, title: title, priceUsd: priceUsd, priceRwf: priceRwf, prepMinutes: prepMinutes, qty: qty, notes: notes });
         if (modal) modal.hide();
         refreshDock();
         postTrack('dining_cart_item_added', { qty: qty });
@@ -584,9 +661,21 @@
         cart = [];
         refreshDock();
     });
+    document.querySelectorAll('[data-dining-currency]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            setMenuCurrency(btn.getAttribute('data-dining-currency'));
+        });
+    });
+
     document.getElementById('dining-order-whatsapp').addEventListener('click', function () {
         if (!cart.length) {
             alert('Your order is empty. Add dishes from the menu first.');
+            return;
+        }
+        var timeVal = document.getElementById('dining-global-time') ? document.getElementById('dining-global-time').value : '';
+        if (!timeVal) {
+            alert('Please set the time you need your order (Time required).');
+            document.getElementById('dining-global-time') && document.getElementById('dining-global-time').focus();
             return;
         }
         if (!cfg.wa || cfg.wa.length < 8) {
@@ -598,22 +687,8 @@
             window.open('https://wa.me/' + cfg.wa + '?text=' + encodeURIComponent(plain), '_blank');
         });
     });
-    document.getElementById('dining-order-email').addEventListener('click', function () {
-        if (!cart.length) {
-            alert('Your order is empty. Add dishes from the menu first.');
-            return;
-        }
-        if (!cfg.email) {
-            alert('Email ordering is unavailable (no hotel email on file). Please try WhatsApp or call the hotel directly.');
-            return;
-        }
-        var plain = buildMessage();
-        postDiningSubmission('email', plain).finally(function () {
-            var sub = encodeURIComponent('Dining order — ' + cfg.hotel);
-            var body = encodeURIComponent(plain);
-            window.location.href = 'mailto:' + cfg.email + '?subject=' + sub + '&body=' + body;
-        });
-    });
+    menuCurrency = getMenuCurrency();
+    setMenuCurrency(menuCurrency);
     load();
     refreshDock();
 })();

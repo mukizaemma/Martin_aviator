@@ -105,7 +105,7 @@
                 <div class="row justify-content-center">
                     <div class="col-xl-6 col-lg-8 col-md-10">
                         <div class="section-title text-center mb-60 rmb-40 wow fadeInUp delay-0-2s">
-                            <h2>Explore Our Luxury Trendy Rooms and Suites</h2>
+                            <h2>Explore Our Rooms &amp; Suites</h2>
                         </div>
                     </div>
                 </div>
@@ -125,17 +125,22 @@
                                 </div>
                                 <div class="content flex-grow-1 d-flex flex-column">
                                     <h3 class="mb-15"><a href="{{ route('singleRoom', ['slug' => $room->slug]) }}">{{ $room->roomName }}</a></h3>
-                                    <ul class="room-amenity-chips" aria-label="Room highlights">
-                                        <li><i class="fas fa-bed" aria-hidden="true"></i><span>Bed</span></li>
-                                        <li><i class="fas fa-coffee" aria-hidden="true"></i><span>Breakfast</span></li>
+                                    <ul class="ma-room-inclusions list-unstyled small mb-2">
+                                        <li><i class="fas fa-coffee me-1" aria-hidden="true"></i> Bed &amp; Breakfast</li>
+                                        <li><i class="fas fa-shuttle-van me-1" aria-hidden="true"></i> Airport Shuttle</li>
                                     </ul>
                                     <div class="price">
-                                        <b>{!! \App\Support\Currency::formatUsdWithLocal($room->price, $room->price_rwf) !!}</b>/<br>
-                                        <span>per night</span>
+                                        <b>{!! \App\Support\Currency::formatUsdOnly($room->price) !!}</b>
+                                        <span class="d-block small">per night</span>
                                     </div>
-                                    <a href="{{ route('singleRoom', ['slug' => $room->slug]) }}" class="theme-btn style-three home-room-card__btn mt-auto w-100 d-inline-flex justify-content-center align-items-center">
-                                        View Details <i class="far fa-angle-right"></i>
-                                    </a>
+                                    <div class="d-flex flex-wrap gap-2 mt-auto">
+                                        <a href="{{ route('singleRoom', ['slug' => $room->slug]) }}" class="theme-btn style-three home-room-card__btn flex-grow-1 d-inline-flex justify-content-center align-items-center">
+                                            View Details <i class="far fa-angle-right"></i>
+                                        </a>
+                                        <a href="{{ route('pay.dpo', ['room' => $room->slug]) }}" class="theme-btn home-room-card__btn flex-grow-1 d-inline-flex justify-content-center align-items-center">
+                                            Book Now <i class="far fa-angle-right"></i>
+                                        </a>
+                                    </div>
                                 </div>
                             </article>
                         </div>
@@ -144,7 +149,7 @@
                 @if ($rooms->count() > 4)
                     <div class="text-center mt-50 wow fadeInUp delay-0-2s">
                         <a href="{{ route('rooms') }}" class="theme-btn style-three">
-                            View more rooms <i class="far fa-angle-right"></i>
+                            View all accommodation <i class="far fa-angle-right"></i>
                         </a>
                     </div>
                 @endif

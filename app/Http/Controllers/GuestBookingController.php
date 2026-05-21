@@ -35,7 +35,11 @@ class GuestBookingController extends Controller
             $selectedRoomId = $r?->id;
         }
 
-        return $this->spaView('frontend.room-booking', compact('rooms', 'selectedRoomId'), 'Book a room');
+        $allowedChannels = ['whatsapp', 'email', 'booking_com', 'expedia'];
+        $channel = $request->query('channel');
+        $selectedChannel = in_array($channel, $allowedChannels, true) ? $channel : '';
+
+        return $this->spaView('frontend.room-booking', compact('rooms', 'selectedRoomId', 'selectedChannel'), 'Book a room');
     }
 
     public function store(Request $request): RedirectResponse
@@ -49,7 +53,7 @@ class GuestBookingController extends Controller
             'guest_phone' => 'required|string|max:64',
             'guest_email' => 'required|email|max:255',
             'guest_country' => 'required|string|max:120',
-            'fulfillment_choice' => 'required|in:direct_pay,pay_on_delivery,booking_com,expedia',
+            'fulfillment_choice' => 'required|in:direct_pay,whatsapp,email,booking_com,expedia,pay_on_delivery',
         ])->validate();
 
         $setting = Setting::first();
@@ -89,8 +93,11 @@ class GuestBookingController extends Controller
         ]);
 
         return match ($validated['fulfillment_choice']) {
-            'direct_pay' => redirect()->route('pay.dpo')->with('booking_public_id', $record->public_id),
-            'pay_on_delivery' => redirect()->route('room.booking.confirmation', $record->public_id),
+            'direct_pay' => redirect()->route('pay.dpo', array_filter([
+                'room' => $room?->slug,
+            ]))->with('booking_public_id', $record->public_id),
+            'whatsapp', 'pay_on_delivery' => redirect()->route('room.booking.whatsapp', $record->public_id),
+            'email' => redirect()->route('room.booking.email', $record->public_id),
             'booking_com' => redirect()->route('room.booking.ota', ['publicId' => $record->public_id, 'which' => 'booking_com']),
             'expedia' => redirect()->route('room.booking.ota', ['publicId' => $record->public_id, 'which' => 'expedia']),
         };
@@ -99,7 +106,7 @@ class GuestBookingController extends Controller
     public function confirmation(string $publicId): View|Response
     {
         $booking = GuestBookingRequest::with('room')->where('public_id', $publicId)->firstOrFail();
-        if ($booking->fulfillment_choice !== 'pay_on_delivery') {
+        if (! in_array($booking->fulfillment_choice, ['pay_on_delivery'], true)) {
             abort(404);
         }
 
@@ -109,7 +116,7 @@ class GuestBookingController extends Controller
     public function openWhatsapp(Request $request, string $publicId): RedirectResponse
     {
         $booking = GuestBookingRequest::with('room')->where('public_id', $publicId)->firstOrFail();
-        if ($booking->fulfillment_choice !== 'pay_on_delivery') {
+        if (! in_array($booking->fulfillment_choice, ['whatsapp', 'pay_on_delivery'], true)) {
             abort(404);
         }
         $digits = preg_replace('/\D+/', '', (string) (Setting::first()->phone ?? ''));
@@ -130,7 +137,7 @@ class GuestBookingController extends Controller
     public function emailInstructions(Request $request, string $publicId): View|Response
     {
         $booking = GuestBookingRequest::with('room')->where('public_id', $publicId)->firstOrFail();
-        if ($booking->fulfillment_choice !== 'pay_on_delivery') {
+        if ($booking->fulfillment_choice !== 'email') {
             abort(404);
         }
         $email = trim((string) (Setting::first()->email ?? ''));
@@ -194,11 +201,13 @@ class GuestBookingController extends Controller
         $lines[] = 'Email: '.$v['guest_email'];
         $lines[] = 'Country: '.$v['guest_country'];
         $lines[] = '';
-        $lines[] = 'Fulfillment choice: '.match ($v['fulfillment_choice']) {
-            'direct_pay' => 'Direct pay (card — DPO on website)',
-            'pay_on_delivery' => 'Pay on arrival (confirm via WhatsApp or email)',
-            'booking_com' => 'Book on Booking.com',
-            'expedia' => 'Book on Expedia',
+        $lines[] = 'Booking method: '.match ($v['fulfillment_choice']) {
+            'direct_pay' => 'Book and pay directly (card — coming soon)',
+            'whatsapp' => 'Book through WhatsApp',
+            'email' => 'Book through email',
+            'pay_on_delivery' => 'Pay on arrival (legacy)',
+            'booking_com' => 'Booking.com',
+            'expedia' => 'Expedia',
             default => $v['fulfillment_choice'],
         };
         $lines[] = '— Sent from the hotel website booking form.';

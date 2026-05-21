@@ -178,6 +178,7 @@ class DiningController extends Controller
             'description' => 'nullable|string|max:5000',
             'price_usd' => 'required|numeric|min:0',
             'price_rwf' => 'nullable|numeric|min:0',
+            'prep_minutes' => 'nullable|integer|min:1|max:600',
             'image' => 'nullable|image|max:4096',
             'menu_category_id' => 'nullable|exists:menu_categories,id',
         ]);
@@ -195,6 +196,7 @@ class DiningController extends Controller
             'description' => $request->input('description'),
             'price_usd' => $request->price_usd,
             'price_rwf' => $request->filled('price_rwf') ? $request->input('price_rwf') : null,
+            'prep_minutes' => $request->filled('prep_minutes') ? $request->input('prep_minutes') : null,
             'image' => $imageName,
             'sort_order' => $maxSort + 1,
             'menu_category_id' => $request->input('menu_category_id'),
@@ -210,6 +212,7 @@ class DiningController extends Controller
             'description' => 'nullable|string|max:5000',
             'price_usd' => 'required|numeric|min:0',
             'price_rwf' => 'nullable|numeric|min:0',
+            'prep_minutes' => 'nullable|integer|min:1|max:600',
             'image' => 'nullable|image|max:4096',
             'menu_category_id' => 'nullable|exists:menu_categories,id',
         ]);
@@ -218,6 +221,7 @@ class DiningController extends Controller
         $item->description = $request->input('description');
         $item->price_usd = $request->price_usd;
         $item->price_rwf = $request->filled('price_rwf') ? $request->input('price_rwf') : null;
+        $item->prep_minutes = $request->filled('prep_minutes') ? $request->input('prep_minutes') : null;
         $item->menu_category_id = $request->input('menu_category_id');
 
         if ($request->hasFile('image')) {

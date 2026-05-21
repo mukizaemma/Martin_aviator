@@ -13,7 +13,11 @@ class Room extends Model
 
     protected $table = 'rooms';
 
-    protected $fillable = ['roomName', 'category', 'image', 'slug', 'price', 'price_rwf', 'size', 'quantity', 'maxAdults', 'maxChildren', 'description'];
+    public const TYPE_ROOM = 'room';
+
+    public const TYPE_APARTMENT = 'apartment';
+
+    protected $fillable = ['roomName', 'category', 'accommodation_type', 'image', 'slug', 'price', 'price_rwf', 'size', 'quantity', 'maxAdults', 'maxChildren', 'description'];
 
     protected static function booted(): void
     {

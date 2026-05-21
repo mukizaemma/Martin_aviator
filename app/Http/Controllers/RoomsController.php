@@ -51,11 +51,13 @@ class RoomsController extends Controller
         $rooms = Room::with('amenityOptions')->get();
         $amenityOptions = HotelAmenityOption::orderBy('sort_order')->orderBy('label')->get();
         $categories = ['single', 'double', 'tween', 'apartment'];
+        $accommodationTypes = [Room::TYPE_ROOM, Room::TYPE_APARTMENT];
 
         return view('admin.rooms', [
             'rooms' => $rooms,
             'amenityOptions' => $amenityOptions,
             'categories' => $categories,
+            'accommodationTypes' => $accommodationTypes,
         ]);
     }
 
@@ -79,6 +81,7 @@ class RoomsController extends Controller
             [
                 'roomName' => $request->input('roomName'),
                 'category' => $request->filled('category') ? $request->input('category') : null,
+                'accommodation_type' => $request->input('accommodation_type', Room::TYPE_ROOM),
                 'price' => $request->input('price'),
                 'price_rwf' => $request->filled('price_rwf') ? $request->input('price_rwf') : null,
                 'size' => $request->input('size'),
@@ -103,6 +106,8 @@ class RoomsController extends Controller
         return view('admin.roomUpdate', [
             'room' => $room,
             'amenityOptions' => $amenityOptions,
+            'accommodationTypes' => [Room::TYPE_ROOM, Room::TYPE_APARTMENT],
+            'categories' => ['single', 'double', 'tween', 'apartment'],
         ]);
     }
 
@@ -125,6 +130,12 @@ class RoomsController extends Controller
 
         // Update other fields
         $room->roomName = $request->input('roomName');
+        if ($request->filled('accommodation_type')) {
+            $room->accommodation_type = $request->input('accommodation_type');
+        }
+        if ($request->filled('category')) {
+            $room->category = $request->input('category');
+        }
         $room->price = $request->input('price');
         $room->price_rwf = $request->filled('price_rwf') ? $request->input('price_rwf') : null;
         $room->size = $request->input('size');

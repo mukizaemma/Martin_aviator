@@ -1,49 +1,44 @@
+@php
+    $activeTab = $activeTab ?? 'rooms';
+    $roomsList = $rooms->where('accommodation_type', \App\Models\Room::TYPE_ROOM);
+    $apartmentsList = $rooms->where('accommodation_type', \App\Models\Room::TYPE_APARTMENT);
+    $displayRooms = $activeTab === 'apartments' ? $apartmentsList : $roomsList;
+@endphp
 <section class="rooms-2columns-area rooms-on-white pb-30 rpb-90 rel z-2">
     <div class="container container-1130">
         <div class="row justify-content-center">
-            <div class="col-xl-6 col-lg-8 col-md-10">
-                <div class="section-title text-center mb-70 rmb-50 wow fadeInUp delay-0-2s">
-                    <h2>Our Stunning Rooms</h2>
+            <div class="col-xl-8 col-lg-10">
+                <div class="section-title text-center mb-50 rmb-40 wow fadeInUp delay-0-2s">
+                    <h2>Accommodation</h2>
+                    <p class="text-muted mb-0">Rooms and apartments — all rates in US dollars, breakfast and airport shuttle included.</p>
                 </div>
+                <ul class="nav nav-pills justify-content-center ma-accommodation-tabs mb-50" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link {{ $activeTab === 'rooms' ? 'active' : '' }}" href="{{ route('rooms', ['tab' => 'rooms']) }}" role="tab" @if($activeTab === 'rooms') aria-current="page" @endif>Rooms</a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link {{ $activeTab === 'apartments' ? 'active' : '' }}" href="{{ route('rooms', ['tab' => 'apartments']) }}" role="tab" @if($activeTab === 'apartments') aria-current="page" @endif>Apartments</a>
+                    </li>
+                </ul>
             </div>
         </div>
         <div class="row gap-90">
-            @foreach($rooms as $room )
-            <div class="col-md-6">
-                <div class="room-item style-three wow fadeInUp delay-0-2s">
-                    <div class="image">
-                        <img src="{{ asset('storage/images/rooms/' . $room->image) }}" alt="Room">
-                    </div>
-                    <div class="content">
-                        <div class="price">{!! \App\Support\Currency::formatUsdWithLocal($room->price, $room->price_rwf) !!} Per Night</div>
-                        <h3><a href="{{ route('singleRoom',['slug'=>$room->slug]) }}">{{ $room->roomName }}</a></h3>
-                        <ul class="blog-meta">
-                            <li>
-                                <i class="far fa-drafting-compass"></i>
-                                <a href="{{ route('singleRoom',['slug'=>$room->slug]) }}">Size : {{ $room->size }}</a>
-                            </li>
-                            <li>
-                                <i class="far fa-bath"></i>
-                                <a href="{{ route('singleRoom',['slug'=>$room->slug]) }}">Max Adults : {{ $room->maxAdults }}</a>
-                            </li>
-                            <li>
-                                <i class="far fa-bed-alt"></i>
-                                <a href="{{ route('singleRoom',['slug'=>$room->slug]) }}">Max Children : {{ $room->maxChildren }}</a>
-                            </li>
-                        </ul>
-                        <a class="theme-btn style-two" href="{{ route('room.booking', ['room' => $room->slug]) }}">Book Now <i class="fal fa-angle-right"></i></a>
-                    </div>
+            @forelse($displayRooms as $room)
+                <div class="col-md-6">
+                    @include('frontend.includes.room-card', ['room' => $room])
                 </div>
-            </div>                        
-            @endforeach
+            @empty
+                <div class="col-12 text-center text-muted py-5">
+                    <p class="mb-0">No {{ $activeTab === 'apartments' ? 'apartments' : 'rooms' }} listed yet. Please check back soon or <a href="{{ route('contact') }}">contact us</a>.</p>
+                </div>
+            @endforelse
         </div>
 
         <div class="row justify-content-center">
             <div class="col-12">
-                <div class="section-title text-center mb-70 rmb-50 wow fadeInUp delay-0-2s">
+                <div class="section-title text-center mb-70 rmb-50 wow fadeInUp delay-0-2s mt-4">
                     <p>
-                        Each of our rooms is designed for comfort and relaxation, offering stunning views, modern amenities, and a peaceful ambiance. 
-                        Breakfast is included with all rooms, and unless stated otherwise, each room accommodates two guests. An extra bed is available upon request for $20 per night.
+                        Each stay includes <strong>bed &amp; breakfast</strong> and <strong>airport shuttle</strong>. Unless stated otherwise, each room accommodates two guests. An extra bed is available upon request for $20 per night.
                     </p>
                 </div>
             </div>
@@ -57,4 +52,3 @@
        <span></span><span></span>
     </div>
 </section>
-

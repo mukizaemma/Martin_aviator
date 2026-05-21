@@ -24,6 +24,21 @@ class Currency
     }
 
     /**
+     * USD only — for accommodation (no RWF hover or toggle).
+     */
+    public static function formatUsdOnly(float|string|null $usd): string
+    {
+        if ($usd === null || $usd === '') {
+            return '';
+        }
+
+        $usd = (float) $usd;
+        $usdFmt = number_format($usd, $usd == floor($usd) ? 0 : 2);
+
+        return '<span class="price-usd-only">$'.$usdFmt.'</span>';
+    }
+
+    /**
      * Primary display: USD. RWF from stored amount if set, otherwise from settings rate.
      * Hover: native tooltip on title. Click/tap/Enter: toggles inline RWF (see dual-currency.js).
      */
@@ -70,17 +85,27 @@ class Currency
 
         $usd = (float) $usd;
         $usdFmt = '$'.number_format($usd, $usd == floor($usd) ? 0 : 2);
-        $label = $usdFmt.' / night';
 
-        if ($rwfStored !== null && $rwfStored !== '' && (float) $rwfStored > 0) {
-            $rwfFmt = number_format((float) $rwfStored, 0, '.', ',');
+        return $usdFmt.' / night';
+    }
 
-            return $label.' · ≈ '.$rwfFmt.' RWF';
+    public static function formatDiningPrice(float|string|null $usd, float|string|null $rwfStored = null, string $currency = 'usd'): string
+    {
+        if ($usd === null || $usd === '') {
+            return '';
         }
 
-        $rwfApprox = self::usdToRwf($usd);
-        $rwfFmt = number_format($rwfApprox, 0, '.', ',');
+        if ($currency === 'rwf') {
+            $hasStoredRwf = $rwfStored !== null && $rwfStored !== '' && (float) $rwfStored > 0;
+            $rwf = $hasStoredRwf ? (float) $rwfStored : self::usdToRwf((float) $usd);
+            $rwfFmt = number_format($rwf, 0, '.', ',');
 
-        return $label.' · ≈ '.$rwfFmt.' RWF';
+            return '<span class="dining-price dining-price--rwf">'.$rwfFmt.' RWF</span>';
+        }
+
+        $usd = (float) $usd;
+        $usdFmt = number_format($usd, $usd == floor($usd) ? 0 : 2);
+
+        return '<span class="dining-price dining-price--usd">$'.$usdFmt.'</span>';
     }
 }

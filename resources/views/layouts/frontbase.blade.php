@@ -112,8 +112,13 @@
 
                                     <ul class="navigation clearfix">
                                         <li><a href="{{ route('home') }}">Home</a></li>
-                                        <li><a href="{{ route('rooms') }}">Rooms &amp; Apartments</a></li>
-                                        <li><a href="{{ route('dining') }}">Dining</a></li>
+                                        <li class="dropdown"><a href="{{ route('rooms') }}">Accommodation</a>
+                                            <ul>
+                                                <li><a href="{{ route('rooms', ['tab' => 'rooms']) }}">Rooms</a></li>
+                                                <li><a href="{{ route('rooms', ['tab' => 'apartments']) }}">Apartments</a></li>
+                                            </ul>
+                                        </li>
+                                        <li><a href="{{ route('dining') }}">Bar &amp; Restaurant</a></li>
                                         <li><a href="{{ route('facilities') }}">Hotel Facilities</a></li>
                                         <li><a href="{{ route('gallery') }}">Gallery</a></li>
                                         <li><a href="{{ route('contact') }}">Contact</a></li>
@@ -165,8 +170,8 @@
         <!-- footer area start -->
         <footer class="main-footer bgc-black pt-100 rel z-1 ma-footer-gold">
             <div class="container">
-                <div class="row justify-content-xl-between justify-content-between">
-                    <div class="col-lg-3 col-sm-12">
+                <div class="row justify-content-xl-between justify-content-between g-4">
+                    <div class="col-lg-4 col-sm-12">
                         <div class="footer-widget widget_about wow fadeInUp delay-0-2s">
                             <div class="footer-logo mb-25">
                                 <a href="{{route('home')}}"><img src="{{ $brandLogo }}" alt="{{ $setting->company ?? 'Martin Aviator Hotel' }}" style="height: 80px !important"></a>
@@ -186,19 +191,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-2 col-sm-12">
-                        <div class="footer-widget widget_nav_menu wow fadeInUp delay-0-4s">
-                            <h4 class="footer-title">Quick Links</h4>
-                            <ul class="list-style-one">
-                                <li><a href="{{ route('aboutUs') }}">About Us</a></li>
-                                <li><a href="{{ route('rooms') }}">Our Rooms</a></li>
-                                <li><a href="{{ route('facilities') }}">Our Services</a></li>
-                                <li><a href="{{ route('contact') }}">Contact Us</a></li>
-                                <li><a href="{{ route('terms') }}">Terms & Conditions</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-sm-12">
+                    <div class="col-lg-4 col-sm-12">
                         <div class="footer-widget widget_nav_menu wow fadeInUp delay-0-4s">
                             <h4 class="footer-title">Hotel Facilities</h4>
                             <ul class="list-style-one">
@@ -209,7 +202,7 @@
                         </div>
                     </div>
                     <div class="col-lg-4 col-sm-12">
-                        @include('frontend.includes.booking-channels-grid')
+                        @include('frontend.includes.booking-channels-grid', ['compact' => false])
                         <div class="mt-4 pt-3 border-top border-secondary border-opacity-25">
                             <h4 class="section-title-sm font-weight-bold mb-3">Payment methods</h4>
                             <img src="{{ asset('assets/images/payment1.png') }}" alt="Accepted cards and mobile money" class="img-fluid">

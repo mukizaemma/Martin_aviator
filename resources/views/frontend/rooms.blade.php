@@ -3,8 +3,8 @@
 @section('content')
 
 @include('frontend.includes.page-header', [
-    'title' => 'Our rooms',
-    'subtitle' => $setting->flexible_stay_subheading ?: 'Choose the right setup for your trip.',
+    'title' => 'Accommodation',
+    'subtitle' => $setting->flexible_stay_subheading ?: 'Rooms and apartments near Kigali International Airport.',
     'highlights' => [
         [
             'title' => $setting->flexible_stay_card1_title ?: 'Flexible Room Choices',

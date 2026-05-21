@@ -1602,3 +1602,52 @@ body.spa-loading::before {
     opacity: 1;
   }
 }
+
+/* Accommodation tabs & room cards */
+.ma-accommodation-tabs .nav-link {
+  color: var(--heading-color, #1a1a1a);
+  border-radius: 2rem;
+  padding: 0.5rem 1.5rem;
+  font-weight: 600;
+}
+.ma-accommodation-tabs .nav-link.active {
+  background: var(--header-footer-accent, #e89b00);
+  color: #fff;
+}
+.ma-room-inclusions li {
+  margin-bottom: 0.25rem;
+}
+.ma-room-inclusions i {
+  color: var(--header-footer-accent, #e89b00);
+}
+.ma-room-card__actions .theme-btn {
+  flex: 1 1 auto;
+  min-width: 8rem;
+  text-align: center;
+}
+.price-usd-only {
+  font-weight: 700;
+  font-size: 1.15rem;
+}
+.ma-room-card .price-suffix {
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+
+/* Booking channels (footer & book page) */
+.ma-book-channels__group-title {
+  color: var(--header-footer-accent, #e89b00);
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+}
+.ma-footer-gold .ma-book-channels__intro {
+  color: rgba(255, 255, 255, 0.75);
+}
+.dining-currency-picker .btn.active {
+  background: var(--header-footer-accent, #e89b00);
+  border-color: var(--header-footer-accent, #e89b00);
+  color: #fff;
+}
+.home-dining-mini-table__prep {
+  font-size: 0.8rem;
+}

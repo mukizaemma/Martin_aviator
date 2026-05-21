@@ -79,7 +79,7 @@ class HomeController extends Controller
 
         return $this->spaView('frontend.dining', compact(
             'diningMenuColumns'
-        ), 'Dining');
+        ), 'Bar & Restaurant');
     }
 
     public function facilitySingle($slug)
@@ -158,13 +158,18 @@ class HomeController extends Controller
         ], 'Reservation');
     }
 
-    public function rooms()
+    public function rooms(Request $request)
     {
-        $rooms = Room::with('images')->oldest()->get();
+        $allRooms = Room::with('images')->oldest()->get();
+        $activeTab = $request->query('tab', 'rooms');
+        if (! in_array($activeTab, ['rooms', 'apartments'], true)) {
+            $activeTab = 'rooms';
+        }
 
         return $this->spaView('frontend.rooms', [
-            'rooms' => $rooms,
-        ], 'Rooms');
+            'rooms' => $allRooms,
+            'activeTab' => $activeTab,
+        ], 'Accommodation');
     }
 
     public function singleRoom($slug)
@@ -468,16 +473,20 @@ class HomeController extends Controller
             $rawDesc = trim(preg_replace('/\s+/u', ' ', $rawDesc));
             $short = Str::limit($rawDesc, 160);
 
+            $rwfAttr = $i->price_rwf && (float) $i->price_rwf > 0
+                ? (string) (int) round((float) $i->price_rwf)
+                : '';
+
             return [
                 'id' => $i->id,
                 'title' => $i->title,
                 'description' => $short,
                 'descriptionTitle' => $rawDesc,
-                'priceHtml' => Currency::formatUsdWithLocal($i->price_usd, $i->price_rwf),
+                'priceHtmlUsd' => Currency::formatDiningPrice($i->price_usd, $i->price_rwf, 'usd'),
+                'priceHtmlRwf' => Currency::formatDiningPrice($i->price_usd, $i->price_rwf, 'rwf'),
                 'priceUsd' => number_format((float) $i->price_usd, 2, '.', ''),
-                'priceRwfAttr' => $i->price_rwf && (float) $i->price_rwf > 0
-                    ? (string) (int) round((float) $i->price_rwf)
-                    : '',
+                'priceRwfAttr' => $rwfAttr,
+                'prepMinutes' => $i->prep_minutes ? (int) $i->prep_minutes : null,
             ];
         };
 

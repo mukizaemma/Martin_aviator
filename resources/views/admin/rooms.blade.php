@@ -48,7 +48,8 @@
                                     <tr>
                                         <th>Room Name</th>
                                         <th>Price</th>
-                                        <th>Category</th>
+                                        <th>Type</th>
+                                        <th>Room style</th>
                                         <th>Image</th>
                                         <th>Gallery</th>
                                         <th>Description</th>
@@ -61,6 +62,7 @@
                                         <tr>
                                             <td>{{ $rs->roomName }}</td>
                                             <td>{!! \App\Support\Currency::formatUsdWithLocal($rs->price, $rs->price_rwf) !!}</td>
+                                            <td>{{ ucfirst($rs->accommodation_type ?? 'room') }}</td>
                                             <td>{{ $rs->category }}</td>
                                             <td><img src="{{ asset('storage/images/rooms/' . $rs->image) }}" alt="" width="150px"></td>
                                             <td>
@@ -117,6 +119,23 @@
                                             </div>
                                     
                                             <div class="row mt-3">
+                                                <div class="col-md-3">
+                                                    <label for="accommodation_type">Listing type</label>
+                                                    <select name="accommodation_type" id="accommodation_type" class="form-select" required>
+                                                        @foreach ($accommodationTypes as $type)
+                                                            <option value="{{ $type }}">{{ ucfirst($type) }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label for="category">Room style</label>
+                                                    <select name="category" id="category" class="form-select">
+                                                        <option value="">—</option>
+                                                        @foreach ($categories as $cat)
+                                                            <option value="{{ $cat }}">{{ ucfirst($cat) }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
                                                 <div class="col-md-3">
                                                     <label for="quantity">Room Size</label>
                                                     <input type="text" id="quantity" class="form-control" placeholder="How big is the room?" name="size">

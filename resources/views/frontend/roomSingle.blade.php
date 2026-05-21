@@ -50,7 +50,11 @@
                 </div>
                 <div class="col-lg-6">
                     <div class="product-details-content mt-35 rmt-55 wow fadeInRight delay-0-2s">
-                        <span class="price mb-30">{!! \App\Support\Currency::formatUsdWithLocal($room->price, $room->price_rwf) !!}</span>
+                        <span class="price mb-20">{!! \App\Support\Currency::formatUsdOnly($room->price) !!} <span class="small">per night</span></span>
+                        <ul class="ma-room-inclusions list-unstyled small mb-30">
+                            <li><i class="fas fa-coffee me-1"></i> Bed &amp; Breakfast included</li>
+                            <li><i class="fas fa-shuttle-van me-1"></i> Airport Shuttle included</li>
+                        </ul>
                         <p>
                             {!! $room->description !!}
                         </p>
@@ -99,10 +103,11 @@
     <div class="container py-5 mb-50">
         <div class="row justify-content-center text-center">
             <div class="col-lg-8">
-                <h3 class="mb-3">Reserve this room</h3>
-                <p class="text-muted mb-4">Choose your dates, airport transfers, and how you would like to pay or complete your booking. Your request is saved for the hotel in the same format as WhatsApp or email.</p>
-                <a href="{{ route('room.booking', ['room' => $room->slug]) }}" class="theme-btn">Book this room <i class="far fa-angle-right ms-2"></i></a>
-                <a href="{{ route('rooms') }}" class="theme-btn style-three ms-2 mt-2 mt-sm-0 d-inline-block">All rooms</a>
+                <h3 class="mb-3">Book this room</h3>
+                <p class="text-muted mb-4">Pay directly when available, or choose WhatsApp, email, or a partner site — all options are on our booking page.</p>
+                <a href="{{ route('pay.dpo', ['room' => $room->slug]) }}" class="theme-btn">Book Now <i class="far fa-angle-right ms-2"></i></a>
+                <a href="{{ route('room.booking', ['room' => $room->slug]) }}" class="theme-btn style-three ms-2 mt-2 mt-sm-0 d-inline-block">Other ways to book</a>
+                <a href="{{ route('rooms') }}" class="theme-btn style-three ms-2 mt-2 mt-sm-0 d-inline-block">All accommodation</a>
             </div>
         </div>
     </div>

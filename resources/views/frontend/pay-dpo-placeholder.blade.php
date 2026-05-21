@@ -3,8 +3,8 @@
 @section('content')
 
 @include('frontend.includes.page-header', [
-    'title' => 'Direct payment',
-    'subtitle' => 'Secure card payments through DPO will be connected here soon.',
+    'title' => 'Book and pay directly',
+    'subtitle' => 'Secure online payment is coming soon.',
     'imageUrl' => null,
 ])
 
@@ -12,12 +12,18 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-8">
-                <div class="border rounded-3 p-4 bg-light">
-                    <p class="mb-3">You chose <strong>direct pay</strong>. Your booking request has been recorded. When DPO is integrated, this page will collect card details securely.</p>
-                    <p class="small text-muted mb-0">Until then, you can go back and submit the same request with <strong>Pay on arrival</strong> (WhatsApp or email) if you prefer.</p>
-                    <div class="mt-4 d-flex flex-wrap gap-2">
-                        <a href="{{ route('room.booking') }}" class="theme-btn style-three">Edit booking request</a>
-                        <a href="{{ route('contact') }}" class="theme-btn">Contact</a>
+                <div class="border rounded-3 p-4 p-md-5 bg-light text-center">
+                    <span class="badge bg-warning text-dark mb-3">Coming soon</span>
+                    <h2 class="h4 mb-3">Direct card payment</h2>
+                    @if (! empty($room))
+                        <p class="mb-3">You selected <strong>{{ $room->roomName }}</strong>. When payment is live, you will complete your booking and pay securely on this page.</p>
+                    @else
+                        <p class="mb-3">When payment is live, you will complete your booking and pay securely on this page.</p>
+                    @endif
+                    <p class="small text-muted mb-4">Until then, book at our discounted rate through WhatsApp or email, or use Booking.com or Expedia.</p>
+                    <div class="d-flex flex-wrap gap-2 justify-content-center">
+                        <a href="{{ route('room.booking', array_filter(['room' => $room->slug ?? null])) }}" class="theme-btn style-three">Other booking options</a>
+                        <a href="{{ route('rooms') }}" class="theme-btn">View accommodation</a>
                     </div>
                 </div>
             </div>
