@@ -6,7 +6,7 @@
             <div class="col-xl-4 col-md-6">
                 <div class="product-item wow fadeInUp delay-0-2s">
                     <div class="image">
-                        <img src="{{ asset('storage/images/services/' . $service->image) }}" alt="{{ $service->title }}" style="height: 350px; object-fit: cover;">
+                        <img src="{{ asset('storage/images/services/' . $service->image) }}" alt="{{ $service->title }}" loading="lazy" decoding="async" style="height: 350px; object-fit: cover;">
                         <div class="social-style-one">
                             <a href="{{ route('singleService',['slug'=>$service->slug]) }}"><i class="far fa-eye"></i></a>
                         </div>

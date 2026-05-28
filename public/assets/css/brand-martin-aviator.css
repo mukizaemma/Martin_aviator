@@ -247,6 +247,14 @@ h6,
   pointer-events: auto !important;
 }
 
+.hidden-bar {
+  pointer-events: none;
+}
+
+.side-content-visible .hidden-bar {
+  pointer-events: auto;
+}
+
 /* Preloader removed — never block interaction while assets load */
 .preloader {
   display: none !important;

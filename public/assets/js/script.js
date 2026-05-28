@@ -128,7 +128,7 @@
         
         
         // ## Video Popup
-        if ($('.video-play').length) {
+        if ($.fn.magnificPopup && $('.video-play').length) {
             $('.video-play').magnificPopup({
                 type: 'video',
             });
@@ -136,7 +136,7 @@
         
         
         // ## Video Btn with text
-        if ($('.video-play-text').length) {
+        if ($.fn.magnificPopup && $('.video-play-text').length) {
             $('.video-play-text').magnificPopup({
                 type: 'video',
             });
@@ -144,17 +144,19 @@
         
         
         // ## Instagram Image Popup Gallery
-        $('.instagram-item .instagram-gallery').magnificPopup({
-            type: 'image',
-            gallery: {
-                enabled: true,
-                navigateByImgClick: true,
-            },
-        });
+        if ($.fn.magnificPopup && $('.instagram-item .instagram-gallery').length) {
+            $('.instagram-item .instagram-gallery').magnificPopup({
+                type: 'image',
+                gallery: {
+                    enabled: true,
+                    navigateByImgClick: true,
+                },
+            });
+        }
          
         
         // ## Main Slider
-        if ($('.main-slider-active').length) {
+        if ($.fn.slick && $('.main-slider-active').length) {
             $('.main-slider-active').slick({
                 infinite: true,
                 arrows: false,
@@ -171,7 +173,7 @@
           
         
         // ## Main Slider Two
-        if ($('.slider-two-active').length) {
+        if ($.fn.slick && $('.slider-two-active').length) {
             $('.slider-two-active').slick({
                 infinite: true,
                 arrows: true,
@@ -189,7 +191,7 @@
           
         
         // ## Hotel Carousel
-        if ($('.hotel-carousel-active').length) {
+        if ($.fn.slick && $('.hotel-carousel-active').length) {
             $('.hotel-carousel-active').slick({
                 dots: true,
                 infinite: true,
@@ -213,7 +215,7 @@
         
         
         // ## Testimonials Slider
-        if ($('.testimonial-active').length) {
+        if ($.fn.slick && $('.testimonial-active').length) {
             $('.testimonial-active').slick({
                 dots: true,
                 infinite: true,
@@ -228,7 +230,7 @@
             });
         }
         
-        if ($('.testimonial-thums').length) {
+        if ($.fn.slick && $('.testimonial-thums').length) {
             $('.testimonial-thums').slick({
                 dots: false,
                 infinite: true,
@@ -246,7 +248,7 @@
         
         
         // ## Room Two Carousel
-        if ($('.room-two-active').length) {
+        if ($.fn.slick && $('.room-two-active').length) {
             $('.room-two-active').slick({
                 dots: true,
                 infinite: true,
@@ -276,7 +278,7 @@
         
         
         // ## Gallery Carousel
-        if ($('.gallery-active').length) {
+        if ($.fn.slick && $('.gallery-active').length) {
             $('.gallery-active').slick({
                 dots: false,
                 infinite: true,
@@ -315,7 +317,7 @@
         
         
         // ## Testimonials Two Slider
-        if ($('.testimonial-two-active').length) {
+        if ($.fn.slick && $('.testimonial-two-active').length) {
             $('.testimonial-two-active').slick({
                 dots: true,
                 infinite: true,
@@ -331,7 +333,7 @@
         
         
         // ## Services Three Carousel
-        if ($('.services-three-slider').length) {
+        if ($.fn.slick && $('.services-three-slider').length) {
             $('.services-three-slider').slick({
                 dots: true,
                 infinite: true,
@@ -370,7 +372,7 @@
         
         
         // ## Testimonials Three Carousel
-        if ($('.testimonials-three-slider').length) {
+        if ($.fn.slick && $('.testimonials-three-slider').length) {
             $('.testimonials-three-slider').slick({
                 dots: true,
                 infinite: true,
@@ -410,7 +412,7 @@
         
         
         // ## History Slider
-        if ($('.history-slider-active').length) {
+        if ($.fn.slick && $('.history-slider-active').length) {
             $('.history-slider-active').slick({
                 dots: false,
                 infinite: true,
@@ -451,7 +453,7 @@
         
         
         // ## Room Details Image Carousel
-        if ($('.room-details-images').length) {
+        if ($.fn.slick && $('.room-details-images').length) {
             $('.room-details-images').slick({
                 dots: true,
                 infinite: true,
@@ -466,7 +468,7 @@
         
         
         // ## Testimonials Four Carousel
-        if ($('.testimonials-four-slider').length) {
+        if ($.fn.slick && $('.testimonials-four-slider').length) {
             $('.testimonials-four-slider').slick({
                 dots: true,
                 infinite: true,
@@ -500,6 +502,9 @@
             $(this).addClass('current');
 
             var selector = $(this).attr('data-filter');
+            if (!$.fn.isotope || !$.fn.imagesLoaded) {
+                return;
+            }
             $('.gallery-masonry-active').imagesLoaded(function () {
                 $('.gallery-masonry-active').isotope({
                     itemSelector: '.item',
@@ -514,7 +519,7 @@
         
         
          /* ## Fact Counter + Text Count - Our Success */
-        if ($('.counter-text-wrap').length) {
+        if ($.fn.appear && $('.counter-text-wrap').length) {
             $('.counter-text-wrap').appear(function () {
                 
                 var $t = $(this),
@@ -560,10 +565,12 @@
         
         
         // ## Nice Select
-        $('select').niceSelect();
+        if ($.fn.niceSelect) {
+            $('select').niceSelect();
+        }
 
         window.maInitGalleryMasonryIfPresent = function () {
-            if (!$('.gallery-masonry-active').length) {
+            if (!$('.gallery-masonry-active').length || !$.fn.isotope || !$.fn.imagesLoaded) {
                 return;
             }
             var $g = $('.gallery-masonry-active');

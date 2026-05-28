@@ -11,7 +11,7 @@
                 <div class="card border-0 shadow-sm h-100">
                     <div class="position-relative overflow-hidden">
                          <a href="{{ route('facilitySingle',['slug'=>$rs->slug]) }}">
-                            <img class="card-img-top" src="{{ asset('storage/images/facilities/' . $rs->image) }}" alt="{{ $rs->title }}" style="object-fit: cover; height: 250px;">
+                            <img class="card-img-top" src="{{ asset('storage/images/facilities/' . $rs->image) }}" alt="{{ $rs->title }}" loading="lazy" decoding="async" style="object-fit: cover; height: 250px;">
                          </a>
                         <div class="overlay bg-dark position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center" style="opacity: 0; transition: opacity 0.4s;">
                             <p class="text-white fw-bold"> <a href="{{ route('facilitySingle',['slug'=>$rs->slug]) }}">{{ $rs->title }}</a></p>

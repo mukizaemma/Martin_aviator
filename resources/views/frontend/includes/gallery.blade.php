@@ -16,6 +16,8 @@
                             <img src="{{ asset('storage/images/gallery/'.$image->image) }}" 
                                  alt="{{ $image->category }}" 
                                  class="gallery-img"
+                                 loading="lazy"
+                                 decoding="async"
                                  data-index="{{ $loop->index }}"
                                  data-src="{{ asset('storage/images/gallery/'.$image->image) }}"
                                  style="height:300px; object-fit: cover; cursor: pointer;"

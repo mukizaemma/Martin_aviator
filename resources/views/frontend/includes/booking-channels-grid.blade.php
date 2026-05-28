@@ -3,7 +3,7 @@
     $waDigits = preg_replace('/\D+/', '', $setting->phone ?? '');
     $compact = $compact ?? false;
 @endphp
-<div class="ma-book-channels">
+<div class="ma-book-channels" data-no-spa>
     @unless ($compact)
         <h4 class="section-title-sm font-weight-bold mb-3">Book your stay</h4>
     @endunless

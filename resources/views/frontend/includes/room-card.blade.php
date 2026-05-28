@@ -2,7 +2,7 @@
 <div class="room-item style-three ma-room-card wow fadeInUp delay-0-2s">
     <div class="image">
         <a href="{{ route('singleRoom', ['slug' => $room->slug]) }}" data-ma-room-slug="{{ $room->slug }}">
-            <img src="{{ asset('storage/images/rooms/' . $room->image) }}" alt="{{ $room->roomName }}">
+            <img src="{{ asset('storage/images/rooms/' . $room->image) }}" alt="{{ $room->roomName }}" loading="lazy" decoding="async" width="640" height="480">
         </a>
     </div>
     <div class="content">
@@ -30,7 +30,7 @@
         </ul>
         <div class="ma-room-card__actions d-flex flex-wrap gap-2">
             <a class="theme-btn style-three" href="{{ route('singleRoom', ['slug' => $room->slug]) }}" data-ma-room-slug="{{ $room->slug }}">View Details <i class="fal fa-angle-right"></i></a>
-            <a class="theme-btn" href="{{ route('pay.dpo', ['room' => $room->slug]) }}" data-ma-room-slug="{{ $room->slug }}">Book Now <i class="fal fa-angle-right"></i></a>
+            <a class="theme-btn" href="{{ route('pay.dpo', ['room' => $room->slug]) }}" data-ma-room-slug="{{ $room->slug }}" data-no-spa>Book Now <i class="fal fa-angle-right"></i></a>
         </div>
     </div>
 </div>

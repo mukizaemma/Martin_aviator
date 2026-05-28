@@ -9,6 +9,8 @@
             <div class="image">
                 <img src="{{ asset('storage/images/gallery') . $image->image }}" 
                      alt="Gallery"
+                     loading="lazy"
+                     decoding="async"
                      style="height: 300px; object-fit:cover; cursor:pointer;"
                      data-index="{{ $index }}"
                      data-src="{{ asset('storage/images/gallery') . $image->image }}"
