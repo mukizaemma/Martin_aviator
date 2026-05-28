@@ -1,3 +1,7 @@
+@php
+    $gallery = $gallery ?? collect();
+@endphp
+@if ($gallery->isNotEmpty())
 <section class="gallery-area mt-120 mb-130 rmb-30">
     <div class="gallery-active">
         @foreach ($gallery as $index => $image)
@@ -51,3 +55,4 @@
         }
     });
 </script>
+@endif

@@ -86,7 +86,7 @@
                                 <tfoot class="table-group-divider" id="dining-order-table-foot"></tfoot>
                             </table>
                         </div>
-                        <label class="form-label small fw-semibold mt-3 mb-1" for="dining-order-additional">Additional requests</label>
+                        <label class="form-label small fw-semibold mt-3 mb-1" for="dining-order-additional">Special Request</label>
                         <textarea class="form-control form-control-sm dining-order-summary-card__textarea" id="dining-order-additional" rows="2" placeholder="Allergies, room number, delivery preference, occasion…"></textarea>
                         <p class="text-muted small mb-0 mt-2" id="dining-order-channel-hint"></p>
                     </div>
@@ -618,7 +618,7 @@
         if (maxPrep) lines.push('Estimated preparation (longest dish): ~' + maxPrep + ' min');
         lines.push('');
         if (extra) {
-            lines.push('ADDITIONAL REQUESTS');
+            lines.push('Special Request');
             lines.push(sep);
             lines.push(extra);
             lines.push('');

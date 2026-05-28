@@ -88,9 +88,20 @@
                 $(this).prev('.megamenu').slideToggle(800);
             });
             
-            //Disable dropdown parent link
+            // Desktop only: parent link toggles submenu via hover; mobile follows href
             $('.navigation li.dropdown > a').on('click', function (e) {
-                e.preventDefault();
+                if ($(window).innerWidth() >= mobileWidth) {
+                    e.preventDefault();
+                }
+            });
+
+            // Close mobile menu after choosing a page
+            $('.main-header .navigation a[href]').on('click', function () {
+                if ($(window).innerWidth() < mobileWidth) {
+                    var $collapse = $('.main-header .navbar-collapse');
+                    $collapse.removeClass('show');
+                    $('.main-header .navbar-toggle').attr('aria-expanded', 'false');
+                }
             });
         }
         

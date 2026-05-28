@@ -271,6 +271,7 @@
     <!-- Custom script -->
     <script src="{{ asset('assets/js/script.js') }}" defer></script>
     <script src="{{ asset('assets/js/dual-currency.js') }}" defer></script>
+    <script src="{{ asset('assets/js/booking-room-persist.js') }}" defer></script>
     <script src="{{ asset('assets/js/parallax-bg.js') }}" defer></script>
     <script>
         (function () {
@@ -294,6 +295,9 @@
                 if (link.target && link.target !== '_self') return false;
                 if (link.hasAttribute('download')) return false;
                 if ((link.getAttribute('rel') || '').includes('external')) return false;
+                if (window.matchMedia('(max-width: 991px)').matches && link.closest('.main-header .navigation')) {
+                    return false;
+                }
                 var url = new URL(link.href, window.location.origin);
                 if (url.origin !== window.location.origin) return false;
                 if (url.hash && url.pathname === window.location.pathname) return false;

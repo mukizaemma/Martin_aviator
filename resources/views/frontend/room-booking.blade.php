@@ -10,6 +10,7 @@
 
 @php
     $selectedChannel = old('fulfillment_choice', $selectedChannel ?? '');
+    $selectedRoomSlug = $selectedRoomId ? ($rooms->firstWhere('id', $selectedRoomId)?->slug ?? '') : '';
     $channelLabels = [
         'direct_pay' => 'Book and pay directly',
         'whatsapp' => 'Book through WhatsApp',
@@ -61,7 +62,7 @@
                             <select class="form-select ma-room-booking__select" id="rb-room" name="room_id">
                                 <option value="">Let the hotel suggest a room</option>
                                 @foreach ($rooms as $r)
-                                    <option value="{{ $r->id }}" @selected((int) ($selectedRoomId ?? 0) === (int) $r->id)>
+                                    <option value="{{ $r->id }}" data-slug="{{ $r->slug }}" @selected((int) old('room_id', $selectedRoomId ?? 0) === (int) $r->id)>
                                         {{ $r->roomName }} — {{ \App\Support\Currency::formatRoomPriceLabel($r->price) }}
                                     </option>
                                 @endforeach
@@ -105,7 +106,7 @@
                             </div>
                         </div>
                         <div class="col-12">
-                            <label class="form-label" for="rb-extra">Additional requests</label>
+                            <label class="form-label" for="rb-extra">Special Request</label>
                             <textarea class="form-control" id="rb-extra" name="additional_requests" rows="3" placeholder="Flight number, late arrival, celebration, accessibility…">{{ old('additional_requests') }}</textarea>
                         </div>
                     </div>
@@ -143,11 +144,52 @@
 <script>
 (function () {
     var labels = @json($channelLabels);
+    var serverRoomSlug = @json($selectedRoomSlug);
     var stepChannels = document.getElementById('rb-step-channels');
     var stepForm = document.getElementById('rb-step-form');
     var hidden = document.getElementById('rb-fulfillment-hidden');
     var labelEl = document.getElementById('rb-channel-label');
     var changeBtn = document.getElementById('rb-change-channel');
+    var roomSelect = document.getElementById('rb-room');
+
+    function persistRoomSlug(slug) {
+        if (!slug) return;
+        if (window.maBookingRoom) window.maBookingRoom.set(slug);
+    }
+
+    function resolveRoomSlug() {
+        var p = new URLSearchParams(window.location.search);
+        var fromUrl = p.get('room') || serverRoomSlug || '';
+        if (fromUrl) return fromUrl;
+        return window.maBookingRoom ? window.maBookingRoom.get() : '';
+    }
+
+    function applyRoomSelection() {
+        if (!roomSelect) return;
+        var slug = resolveRoomSlug();
+        if (!slug) return;
+        var opt = null;
+        Array.prototype.forEach.call(roomSelect.options, function (o) {
+            if (!opt && o.getAttribute('data-slug') === slug) opt = o;
+        });
+        if (opt && opt.value) {
+            roomSelect.value = opt.value;
+            persistRoomSlug(slug);
+        }
+    }
+
+    function syncUrlParams(channel) {
+        try {
+            var u = new URL(window.location.href);
+            if (channel) u.searchParams.set('channel', channel);
+            var slug = roomSelect && roomSelect.selectedOptions[0]
+                ? roomSelect.selectedOptions[0].getAttribute('data-slug')
+                : resolveRoomSlug();
+            if (slug) u.searchParams.set('room', slug);
+            else u.searchParams.delete('room');
+            window.history.replaceState({}, '', u);
+        } catch (e) {}
+    }
 
     function showForm(channel) {
         if (!channel || !labels[channel]) return;
@@ -155,11 +197,8 @@
         labelEl.textContent = labels[channel];
         stepChannels.classList.add('d-none');
         stepForm.classList.remove('d-none');
-        try {
-            var u = new URL(window.location.href);
-            u.searchParams.set('channel', channel);
-            window.history.replaceState({}, '', u);
-        } catch (e) {}
+        applyRoomSelection();
+        syncUrlParams(channel);
     }
 
     document.querySelectorAll('.ma-book-channels a[href*="channel="]').forEach(function (a) {
@@ -168,6 +207,10 @@
             if (!m) return;
             if (m[1] === 'direct_pay') return;
             e.preventDefault();
+            var fromHref = (function () {
+                try { return new URL(a.href, window.location.origin).searchParams.get('room') || ''; } catch (err) { return ''; }
+            })();
+            if (fromHref) persistRoomSlug(fromHref);
             showForm(m[1]);
         });
     });
@@ -180,14 +223,30 @@
         });
     }
 
-    function initFromQuery() {
+    if (roomSelect) {
+        roomSelect.addEventListener('change', function () {
+            var opt = roomSelect.selectedOptions[0];
+            var slug = opt ? opt.getAttribute('data-slug') : '';
+            if (slug) persistRoomSlug(slug);
+            else if (window.maBookingRoom) {
+                try { sessionStorage.removeItem('ma_booking_room_slug'); } catch (e) {}
+            }
+            syncUrlParams(hidden.value || new URLSearchParams(window.location.search).get('channel'));
+        });
+    }
+
+    function initBookingPage() {
         var p = new URLSearchParams(window.location.search);
+        var fromUrl = p.get('room');
+        if (fromUrl) persistRoomSlug(fromUrl);
+        else if (serverRoomSlug) persistRoomSlug(serverRoomSlug);
+        applyRoomSelection();
         var ch = p.get('channel') || hidden.value;
         if (ch && labels[ch] && ch !== 'direct_pay') showForm(ch);
     }
 
-    document.addEventListener('ma:spa-content', initFromQuery);
-    initFromQuery();
+    document.addEventListener('ma:spa-content', initBookingPage);
+    initBookingPage();
 })();
 </script>
 @endsection

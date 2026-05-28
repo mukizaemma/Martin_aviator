@@ -101,9 +101,11 @@ class HomeController extends Controller
     public function services()
     {
         $services = Service::oldest()->get();
+        $gallery = Image::latest()->take(12)->get();
 
         return $this->spaView('frontend.services', [
             'services' => $services,
+            'gallery' => $gallery,
         ], 'Services');
     }
 
@@ -111,10 +113,12 @@ class HomeController extends Controller
     {
         $service = Service::where('slug', $slug)->firstOrFail();
         $images = DB::table('service_images')->where('service_id', $service->id)->latest()->get();
+        $gallery = Image::latest()->take(12)->get();
 
         return $this->spaView('frontend.serviceSingle', [
             'service' => $service,
             'images' => $images,
+            'gallery' => $gallery,
         ], $service->title ?? 'Service');
     }
 
@@ -175,6 +179,7 @@ class HomeController extends Controller
     public function singleRoom($slug)
     {
         $room = Room::with('amenityOptions')->where('slug', $slug)->firstOrFail();
+        request()->session()->put('booking_room_slug', $room->slug);
         $images = DB::table('room_images')->where('room_id', $room->id)->paginate(3);
 
         return $this->spaView('frontend.roomSingle', [

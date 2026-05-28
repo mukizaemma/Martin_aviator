@@ -23,6 +23,9 @@ class DirectPayPlaceholderController extends Controller
         $room = null;
         if ($request->filled('room')) {
             $room = Room::where('slug', $request->query('room'))->first();
+            if ($room) {
+                $request->session()->put('booking_room_slug', $room->slug);
+            }
         }
 
         return $this->spaView('frontend.pay-dpo-placeholder', compact('room'), 'Book and pay');

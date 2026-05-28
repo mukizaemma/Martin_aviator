@@ -124,7 +124,7 @@
                                     >
                                 </div>
                                 <div class="content flex-grow-1 d-flex flex-column">
-                                    <h3 class="mb-15"><a href="{{ route('singleRoom', ['slug' => $room->slug]) }}">{{ $room->roomName }}</a></h3>
+                                    <h3 class="mb-15"><a href="{{ route('singleRoom', ['slug' => $room->slug]) }}" data-ma-room-slug="{{ $room->slug }}">{{ $room->roomName }}</a></h3>
                                     <ul class="ma-room-inclusions list-unstyled small mb-2">
                                         <li><i class="fas fa-coffee me-1" aria-hidden="true"></i> Bed &amp; Breakfast</li>
                                         <li><i class="fas fa-shuttle-van me-1" aria-hidden="true"></i> Airport Shuttle</li>
@@ -134,10 +134,10 @@
                                         <span class="d-block small">per night</span>
                                     </div>
                                     <div class="d-flex flex-wrap gap-2 mt-auto">
-                                        <a href="{{ route('singleRoom', ['slug' => $room->slug]) }}" class="theme-btn style-three home-room-card__btn flex-grow-1 d-inline-flex justify-content-center align-items-center">
+                                        <a href="{{ route('singleRoom', ['slug' => $room->slug]) }}" data-ma-room-slug="{{ $room->slug }}" class="theme-btn style-three home-room-card__btn flex-grow-1 d-inline-flex justify-content-center align-items-center">
                                             View Details <i class="far fa-angle-right"></i>
                                         </a>
-                                        <a href="{{ route('pay.dpo', ['room' => $room->slug]) }}" class="theme-btn home-room-card__btn flex-grow-1 d-inline-flex justify-content-center align-items-center">
+                                        <a href="{{ route('pay.dpo', ['room' => $room->slug]) }}" data-ma-room-slug="{{ $room->slug }}" class="theme-btn home-room-card__btn flex-grow-1 d-inline-flex justify-content-center align-items-center">
                                             Book Now <i class="far fa-angle-right"></i>
                                         </a>
                                     </div>

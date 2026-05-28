@@ -26,13 +26,20 @@ class GuestBookingController extends Controller
 
         $rooms = Room::with('images')->orderBy('roomName')->get();
         $prefillRoomId = $request->query('room_id');
-        $prefillSlug = $request->query('room');
+        $prefillSlug = $request->query('room') ?: $request->session()->get('booking_room_slug');
         $selectedRoomId = null;
         if ($prefillRoomId && $rooms->contains('id', (int) $prefillRoomId)) {
             $selectedRoomId = (int) $prefillRoomId;
+            $match = $rooms->firstWhere('id', (int) $prefillRoomId);
+            if ($match?->slug) {
+                $request->session()->put('booking_room_slug', $match->slug);
+            }
         } elseif ($prefillSlug) {
             $r = $rooms->firstWhere('slug', $prefillSlug);
             $selectedRoomId = $r?->id;
+            if ($selectedRoomId) {
+                $request->session()->put('booking_room_slug', $prefillSlug);
+            }
         }
 
         $allowedChannels = ['whatsapp', 'email', 'booking_com', 'expedia'];
@@ -192,7 +199,7 @@ class GuestBookingController extends Controller
         $lines[] = 'Airport pickup: '.($pickup ? 'Yes' : 'No');
         $lines[] = 'Airport drop-off: '.($dropoff ? 'Yes' : 'No');
         if (! empty($v['additional_requests'])) {
-            $lines[] = 'Additional requests: '.$v['additional_requests'];
+            $lines[] = 'Special Request: '.$v['additional_requests'];
         }
         $lines[] = '';
         $lines[] = 'Guest';

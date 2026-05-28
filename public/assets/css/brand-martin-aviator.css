@@ -117,20 +117,94 @@ h6,
 }
 
 @media only screen and (max-width: 991px) {
+  .header-top-wrap .container {
+    padding-left: 0.65rem;
+    padding-right: 0.65rem;
+  }
+
   .header-top-single {
-    grid-template-columns: 1fr;
-    justify-items: center;
-    text-align: center;
-    padding: 0.65rem 0;
-    row-gap: 0.65rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2rem 0.5rem;
+    padding: 0.35rem 0;
+  }
+
+  .header-contact-inline {
+    flex: 0 0 100%;
+    width: 100%;
   }
 
   .header-contact-list {
     justify-content: center;
+    gap: 0.2rem 0.65rem;
+  }
+
+  .header-contact-list > li {
+    font-size: 11px;
+    gap: 0.3rem;
+  }
+
+  .header-contact-list > li > a {
+    word-break: break-word;
   }
 
   .header-airport-tagline {
-    max-width: 36rem;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: none;
+    margin: 0;
+    justify-content: flex-start;
+    text-align: left;
+    font-size: 9px;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+    gap: 0.3rem;
+  }
+
+  .header-airport-tagline i {
+    font-size: 10px;
+  }
+
+  .header-social-inline {
+    flex: 0 0 auto;
+  }
+
+  .header-social-inline .social-style-two {
+    gap: 0.25rem;
+  }
+
+  .header-social-inline .social-style-two a {
+    font-size: 14px;
+    line-height: 1;
+  }
+}
+
+@media only screen and (max-width: 400px) {
+  .header-contact-list {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+  }
+
+  .header-contact-list > li {
+    font-size: 10px;
+  }
+}
+
+@media only screen and (max-width: 575px) {
+  .header-airport-tagline {
+    flex: 0 0 100%;
+    justify-content: center;
+    text-align: center;
+    font-size: 8.5px;
+  }
+
+  .header-social-inline {
+    flex: 0 0 100%;
+    display: flex;
+    justify-content: center;
   }
 }
 
@@ -138,6 +212,31 @@ h6,
 @media only screen and (max-width: 479px) {
   .header-top-wrap {
     display: block !important;
+  }
+}
+
+/* Mobile nav: keep links above dropdown chevrons and easy to tap */
+@media only screen and (max-width: 991px) {
+  .main-header .header-upper .main-menu .navbar-collapse > ul {
+    padding: 12px 0;
+  }
+
+  .main-header .header-upper .main-menu .navbar-collapse li.dropdown > a {
+    position: relative;
+    z-index: 2;
+    display: block;
+    padding-right: 3.25rem;
+    pointer-events: auto;
+  }
+
+  .main-header .header-upper .main-menu .navbar-collapse li.dropdown .dropdown-btn {
+    z-index: 3;
+  }
+
+  .main-header .header-upper .main-menu .navbar-collapse li a {
+    position: relative;
+    z-index: 2;
+    -webkit-tap-highlight-color: rgba(232, 155, 0, 0.2);
   }
 }
 
@@ -1642,6 +1741,71 @@ body.spa-loading::before {
 }
 .ma-footer-gold .ma-book-channels__intro {
   color: rgba(255, 255, 255, 0.75);
+}
+.ma-book-channels__list {
+  width: 100%;
+}
+.ma-book-channels__btn {
+  display: flex !important;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  max-width: 100%;
+  padding: 0.45rem 0.75rem !important;
+  min-height: 0;
+  height: auto;
+  line-height: 1.2;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: none;
+  white-space: nowrap;
+  text-align: center;
+  border-radius: 4px;
+}
+.ma-book-channels__btn i {
+  margin-left: 0 !important;
+  margin-right: 0;
+  flex-shrink: 0;
+  font-size: 0.95rem;
+}
+.ma-book-channels__btn-text {
+  white-space: nowrap;
+}
+.ma-book-channels__badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.15rem 0.4rem;
+  line-height: 1.2;
+  flex-shrink: 0;
+}
+.ma-footer-gold .ma-book-channels__btn.style-three {
+  background: #0a0a0a !important;
+  color: var(--header-footer-accent, #e89b00) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.ma-footer-gold .ma-book-channels__btn.style-three:hover {
+  background: var(--header-footer-accent, #e89b00) !important;
+  color: #0a0a0a !important;
+}
+.ma-footer-gold .ma-book-channels__btn:not(.style-three) {
+  background: rgba(0, 0, 0, 0.35) !important;
+}
+.ma-book-channels .btn-outline-light.ma-book-channels__btn {
+  padding: 0.4rem 0.75rem !important;
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+@media (max-width: 380px) {
+  .ma-book-channels__btn {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.5rem !important;
+  }
+  .ma-book-channels__badge {
+    font-size: 0.6rem;
+  }
 }
 .dining-currency-picker .btn.active {
   background: var(--header-footer-accent, #e89b00);
