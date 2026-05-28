@@ -32,8 +32,6 @@
     <link rel="stylesheet" href="{{ asset('assets/css/magnific-popup.min.css') }}">
     <!-- Nice Select -->
     <link rel="stylesheet" href="{{ asset('assets/css/nice-select.min.css') }}">
-    <!-- Type Writer -->
-    <link rel="stylesheet" href="{{ asset('assets/css/jquery.animatedheadline.css') }}">
     <!-- Animate -->
     <link rel="stylesheet" href="{{ asset('assets/css/animate.min.css') }}">
     <!-- Slick -->
@@ -46,9 +44,6 @@
 <body class="home-one">
     <div class="page-wrapper">
 
-        <!-- Preloader -->
-        <div class="preloader"></div>
-
         <!-- main header -->
         <header class="main-header">
            <div class="header-top-wrap bgc-primary">
@@ -56,25 +51,32 @@
                    <div class="header-top-single">
                        <div class="header-contact-inline">
                            <ul class="header-contact-list">
+                               @if (! empty($setting->phone ?? null))
                                <li>
-                                   <i class="fas fa-phone" aria-hidden="true"></i>
-                                   <a href="tel:{{ preg_replace('/\s+/', '', $setting->phone ?? '') }}">{{ $setting->phone ?? '' }}</a>
+                                   <a href="tel:{{ preg_replace('/[^\d+]/', '', $setting->phone) }}" class="header-contact-link">{{ $setting->phone }}</a>
                                </li>
+                               @endif
+                               @if (! empty($setting->email ?? null))
                                <li>
-                                   <i class="fas fa-envelope" aria-hidden="true"></i>
-                                   <a href="mailto:{{ $setting->email ?? '' }}">{{ $setting->email ?? '' }}</a>
+                                   <a href="mailto:{{ $setting->email }}" class="header-contact-link">{{ $setting->email }}</a>
                                </li>
+                               @endif
                            </ul>
                        </div>
                        <p class="header-airport-tagline">
-                           <i class="fas fa-plane-departure" aria-hidden="true"></i>
-                           <span>2 minutes walk from the Kigali international airport exit gate.</span>
+                           2 minutes walk from the Kigali international airport exit gate.
                        </p>
                        <div class="header-social-inline">
                            <div class="social-style-two">
-                               <a href="{{ $setting->facebook ?? '' }}" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-                               <a href="{{ $setting->instagram ?? '' }}" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                               <a href="{{ $setting->twitter ?? '' }}" target="_blank" rel="noopener noreferrer" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                               @if (! empty($setting->facebook ?? null))
+                               <a href="{{ $setting->facebook }}" target="_blank" rel="noopener noreferrer">Facebook</a>
+                               @endif
+                               @if (! empty($setting->instagram ?? null))
+                               <a href="{{ $setting->instagram }}" target="_blank" rel="noopener noreferrer">Instagram</a>
+                               @endif
+                               @if (! empty($setting->twitter ?? null))
+                               <a href="{{ $setting->twitter }}" target="_blank" rel="noopener noreferrer">Twitter</a>
+                               @endif
                            </div>
                        </div>
                    </div>
@@ -258,12 +260,8 @@
     <script src="{{ asset('assets/js/jquery.magnific-popup.min.js') }}" defer></script>
     <!-- Nice Select -->
     <script src="{{ asset('assets/js/jquery.nice-select.min.js') }}" defer></script>
-    <!-- Image Loader -->
+    <!-- Image Loader (gallery masonry) -->
     <script src="{{ asset('assets/js/imagesloaded.pkgd.min.js') }}" defer></script>
-    <!-- Calendar -->
-    <script src="{{ asset('assets/js/calendar.global.min.js') }}" defer></script>
-    <!-- Circle Progress -->
-    <script src="{{ asset('assets/js/circle-progress.min.js') }}" defer></script>
     <!-- Isotope -->
     <script src="{{ asset('assets/js/isotope.pkgd.min.js') }}" defer></script>
     <!--  WOW Animation -->
@@ -294,10 +292,12 @@
                 if (!link || !link.href) return false;
                 if (link.target && link.target !== '_self') return false;
                 if (link.hasAttribute('download')) return false;
+                if (link.hasAttribute('data-no-spa')) return false;
+                if (link.closest('[data-no-spa]')) return false;
                 if ((link.getAttribute('rel') || '').includes('external')) return false;
-                if (window.matchMedia('(max-width: 991px)').matches && link.closest('.main-header .navigation')) {
-                    return false;
-                }
+                var proto = (link.protocol || '').toLowerCase();
+                if (proto === 'tel:' || proto === 'mailto:' || proto === 'javascript:') return false;
+                if (link.closest('.main-header, .main-footer, .hidden-bar, .form-back-drop')) return false;
                 var url = new URL(link.href, window.location.origin);
                 if (url.origin !== window.location.origin) return false;
                 if (url.hash && url.pathname === window.location.pathname) return false;

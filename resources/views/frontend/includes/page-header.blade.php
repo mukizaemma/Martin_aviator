@@ -10,7 +10,7 @@
     $__highlights = $highlights ?? [];
 @endphp
 @if ($__img)
-<section class="page-banner-area parallax-bg pt-170 rpt-110 pb-160 rpb-125 rel z-1 bgs-cover bgc-black text-center"
+<section class="page-banner-area page-banner-area--edge parallax-bg pt-170 rpt-110 pb-160 rpb-125 rel z-1 bgs-cover bgc-black text-center"
     style="background-image: url('{{ $__img }}'); background-size: cover; background-position: center;">
     <div class="container">
         <div class="banner-inner text-white">
@@ -41,7 +41,7 @@
     </div>
 </section>
 @else
-<section class="page-banner-area page-banner-area--solid pt-100 rpt-70 pb-100 rpb-70 rel z-1 bgc-black text-center text-white">
+<section class="page-banner-area page-banner-area--edge page-banner-area--solid pt-100 rpt-70 pb-100 rpb-70 rel z-1 bgc-black text-center text-white">
     <div class="container py-3">
         <div class="banner-inner">
             <h1 class="page-title wow fadeInUp delay-0-2s">{{ $__title }}</h1>

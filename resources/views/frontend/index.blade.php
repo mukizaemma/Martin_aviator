@@ -41,10 +41,10 @@
        
 
         <!-- Slider Section Start -->
-        <section class="hero-slider-two rel z-1" style="width: min(1320px, calc(100% - 30px)); margin: 0 auto;">
+        <section class="hero-slider-two hero-slider-two--edge rel z-1">
             <div class="slider-two-active">
                 @foreach ($slides as $slide )
-                <div class="slider-item-two parallax-bg" style="background-image: url('{{asset('storage/images/slides').$slide->image}}'); object-fit: contain;">
+                <div class="slider-item-two parallax-bg" style="background-image: url('{{asset('storage/images/slides').$slide->image}}');">
                     <div class="container">
                         <div class="slider-content-two">
                             <h1>{{ $slide->heading }}</h1>
