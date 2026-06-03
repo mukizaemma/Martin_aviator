@@ -91,6 +91,7 @@
                                                             <label>Photo <br><span style="color: red"></label>
                                                             <label id="projectinput7" class="file center-block">
                                                                 <input type="file" id="image" name="image"
+                                                                    accept="image/*" data-ma-preset="gallery"
                                                                     required="">
                                                                 <span class="file-custom"></span>
                                                             </label>
@@ -138,9 +139,4 @@
         @include('admin.includes.footer')
     </div>
 </div>
-
-@section('scripts')
-
-
-
 @endsection

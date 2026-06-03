@@ -29,7 +29,7 @@
 
 
     </head>
-    <body class="sb-nav-fixed">
+    <body class="sb-nav-fixed" data-ma-max-image-bytes="{{ (int) config('media.max_image_bytes', 716800) }}">
         <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
             <!-- Navbar Brand-->
             <a class="navbar-brand ps-3" href="{{ route('bookings') }}">Dashbaord</a>
@@ -72,6 +72,7 @@
     <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
 
     <script src="{{ asset('assets') }}/admin/js/summernote.js"></script>
+    <script src="{{ asset('assets/admin/js/image-upload-compress.js') }}" defer></script>
 
         @yield('scripts')
 </body>

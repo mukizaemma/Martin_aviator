@@ -58,7 +58,7 @@
                                 <div class="col-lg-4 col-sm-12">
                                         <label>Change Image <br><span style="color: red">(This image should be resized to 694x1894 pixels)</span></label>
                                         <label id="projectinput7" class="file center-block">
-                                            <input type="file" id="image" name="image">
+                                            <input type="file" id="image" name="image" accept="image/*" data-ma-preset="gallery">
                                             <span class="file-custom"></span>
                                         </label>
                                 </div>

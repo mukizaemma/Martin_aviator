@@ -26,6 +26,22 @@ body.sb-nav-fixed .sb-topnav.navbar-dark {
     padding-bottom: 0.75rem;
 }
 
+.ma-upload-size {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    color: #6c757d;
+}
+
+.ma-upload-size-ok {
+    color: #198754;
+}
+
+.ma-upload-size-warn {
+    color: #b45309;
+}
+
 .ma-admin-page .ma-page-title {
     font-size: 1.35rem;
     font-weight: 700;
