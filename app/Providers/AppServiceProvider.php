@@ -13,9 +13,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // $this->app->singleton(Excel::class, function ($app) {
-        //     return new Excel($app['view'], $app['request']);
-        // });
+        $helpers = app_path('helpers.php');
+        if (is_file($helpers)) {
+            require_once $helpers;
+        }
     }
 
     /**
