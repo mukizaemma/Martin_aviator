@@ -62,11 +62,6 @@ class SettingController extends Controller
             $data->usd_to_rwf_rate = $rate > 0 ? $rate : 1300;
             $data->facilities_intro = $request->input('facilities_intro');
 
-            if ($request->hasFile('facilities_hero_image') && request('facilities_hero_image') != '') {
-                $path = $request->file('facilities_hero_image')->store('public/images/pages');
-                $data->facilities_hero_image = basename($path);
-            }
-
             if ($request->hasFile('logo') && request('logo') != '') {
                 $dir = 'public/images';
 

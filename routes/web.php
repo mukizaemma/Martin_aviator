@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\GuestInsightsController;
+use App\Http\Controllers\Admin\GuestReservationController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\DiningController;
@@ -76,11 +77,15 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
 
     Route::get('/guest-insights', [GuestInsightsController::class, 'index'])->name('guestInsights');
+    Route::get('/guest-reservations', [GuestReservationController::class, 'index'])->name('guestReservations');
 
     Route::get('/setting', [SettingController::class, 'setting'])->name('setting');
     Route::post('/saveSetting', [SettingController::class, 'saveSetting'])->name('saveSetting');
     Route::get('/about', [SettingController::class, 'about'])->name('about');
     Route::post('/saveAbout', [SettingController::class, 'saveAbout'])->name('saveAbout');
+
+    Route::get('/page-headers', [\App\Http\Controllers\Admin\PageHeaderController::class, 'index'])->name('pageHeaders');
+    Route::post('/page-headers/{pageHeader:slug}', [\App\Http\Controllers\Admin\PageHeaderController::class, 'update'])->name('pageHeaders.update');
 
     Route::get('/dining-menu', [DiningController::class, 'index'])->name('diningMenu');
     Route::get('/dining-menu/manage', [DiningController::class, 'menuManage'])->name('diningMenu.manage');

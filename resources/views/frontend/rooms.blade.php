@@ -19,9 +19,7 @@
             'text' => $setting->flexible_stay_card3_text ?: 'Combine rooms and share living spaces comfortably.',
         ],
     ],
-    'imageUrl' => ! empty($about->chooseusImage ?? null)
-        ? asset('storage/images/gallery/' . ltrim($about->chooseusImage, '/'))
-        : null,
+    'pageHeaderSlug' => 'rooms',
 ])
 
 @include('frontend.layouts.rooms')

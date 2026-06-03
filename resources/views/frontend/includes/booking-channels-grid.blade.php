@@ -12,7 +12,7 @@
     <div class="ma-book-channels__group mb-3">
         <p class="ma-book-channels__group-title fw-semibold mb-2">Book at discounted price</p>
         <div class="ma-book-channels__list d-flex flex-column gap-2">
-            <a class="ma-book-channels__btn theme-btn" href="{{ route('pay.dpo') }}">
+            <a class="ma-book-channels__btn theme-btn" href="{{ route('room.booking') }}" data-no-spa>
                 <span class="ma-book-channels__btn-text">Book and pay directly</span>
                 <span class="badge bg-warning text-dark ma-book-channels__badge">Coming soon</span>
             </a>

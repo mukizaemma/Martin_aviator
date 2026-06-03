@@ -5,7 +5,7 @@
 @include('frontend.includes.page-header', [
     'title' => 'News & blog',
     'subtitle' => null,
-    'imageUrl' => null,
+    'pageHeaderSlug' => 'blogs',
 ])
 
 @include('frontend.layouts.blogs')

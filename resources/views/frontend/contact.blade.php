@@ -5,9 +5,7 @@
     @include('frontend.includes.page-header', [
         'title' => 'Get in touch',
         'subtitle' => 'Choose how you would like to reach us or book — no contact form required.',
-        'imageUrl' => ! empty($about->middleImage ?? null)
-            ? asset('storage/images/gallery/' . ltrim($about->middleImage, '/'))
-            : null,
+        'pageHeaderSlug' => 'contact',
     ])
 
         <section id="airport-transfer" class="contact-page-area py-100 rpy-80 rel z-1" tabindex="-1">
@@ -64,13 +62,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="bg-lines for-bg-white">
-               <span></span><span></span>
-               <span></span><span></span>
-               <span></span><span></span>
-               <span></span><span></span>
-               <span></span><span></span>
             </div>
         </section>
 

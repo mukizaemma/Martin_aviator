@@ -33,12 +33,8 @@
                         <form action="{{ route('diningMenu.page') }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Hero image</label>
-                                    @if (! empty($setting->dining_hero_image))
-                                        <div class="mb-2"><img src="{{ asset('storage/images/pages/'.$setting->dining_hero_image) }}" alt="" class="img-fluid rounded" style="max-height:160px;"></div>
-                                    @endif
-                                    <input type="file" name="dining_hero_image" class="form-control" accept="image/*">
+                                <div class="col-12">
+                                    <p class="text-muted small mb-0">The dining page banner is managed under <a href="{{ route('pageHeaders') }}">Page header images</a> (Dining).</p>
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label">Introduction</label>

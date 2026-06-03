@@ -2,8 +2,8 @@
     $amenitiesBg = null;
     if (! empty($setting->flexible_stay_bg_image ?? null)) {
         $amenitiesBg = asset('storage/images/pages/' . ltrim($setting->flexible_stay_bg_image, '/'));
-    } elseif (! empty($setting->facilities_hero_image ?? null)) {
-        $amenitiesBg = asset('storage/images/pages/' . ltrim($setting->facilities_hero_image, '/'));
+    } elseif (page_header_url('facilities')) {
+        $amenitiesBg = page_header_url('facilities');
     }
 
     $items = [

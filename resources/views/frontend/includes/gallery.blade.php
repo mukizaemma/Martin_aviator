@@ -1,91 +1,67 @@
-<section class="gallery-page-area pt-70 rpt-60 pb-100 rpb-0">
+<section class="gallery-page-area ma-gallery-page pt-70 rpt-60 pb-100 rpb-70">
     <div class="container">
-        <!-- Dynamic Filter Tabs -->
-        <ul class="gallery-filter filter-btns-one justify-content-center pb-50 wow fadeInUp delay-0-2s">
-            {{-- <li data-filter="*" class="current">Show All</li> --}}
-            @foreach ($categories as $category)
-                <li data-filter=".{{ Str::slug($category) }}">{{ ucfirst($category) }}</li>
-            @endforeach
-        </ul>
+        @if ($categories->isNotEmpty())
+            <ul class="gallery-filter filter-btns-one justify-content-center pb-40 mb-0" role="tablist" aria-label="Gallery categories">
+                <li data-filter="*" class="current" role="tab" aria-selected="true">All</li>
+                @foreach ($categories as $category)
+                    <li data-filter=".{{ Str::slug($category) }}" role="tab" aria-selected="false">{{ ucfirst($category) }}</li>
+                @endforeach
+            </ul>
+        @endif
 
-        <div class="row gallery-masonry-active">
-            @foreach ($images as $image)
-                <div class="col-xl-4 col-md-6 item {{ Str::slug($image->category) }}">
-                    <div class="gallery-item style-two wow fadeInUp delay-0-2s">
-                        <div class="image">
-                            <img src="{{ asset('storage/images/gallery/'.$image->image) }}" 
-                                 alt="{{ $image->category }}" 
-                                 class="gallery-img"
+        @if ($images->isEmpty())
+            <p class="text-center text-muted mb-0">No gallery images yet.</p>
+        @else
+            <div class="ma-gallery-grid" id="ma-gallery-grid">
+                @foreach ($images as $image)
+                    @php
+                        $src = asset('storage/images/gallery/'.$image->image);
+                        $slug = Str::slug($image->category);
+                    @endphp
+                    <article class="ma-gallery-item item {{ $slug }}" data-category="{{ $slug }}">
+                        <button type="button"
+                            class="ma-gallery-card"
+                            data-gallery-src="{{ $src }}"
+                            data-gallery-caption="{{ $image->caption ?? ucfirst($image->category) }}"
+                            aria-label="View {{ $image->caption ?? $image->category }}">
+                            <img src="{{ $src }}"
+                                 alt="{{ $image->caption ?? $image->category }}"
                                  loading="lazy"
                                  decoding="async"
-                                 data-index="{{ $loop->index }}"
-                                 data-src="{{ asset('storage/images/gallery/'.$image->image) }}"
-                                 style="height:300px; object-fit: cover; cursor: pointer;"
-                                 onclick="openModal({{ $loop->index }})">
-                        </div>
-                        <div class="over-content">
-                            <h2>{{ $image->caption ?? '' }}</h2>
-                            <span class="eye-icon" onclick="openModal({{ $loop->index }})">
-                                👁️
+                                 width="640"
+                                 height="480">
+                            <span class="ma-gallery-card__overlay" aria-hidden="true">
+                                <i class="far fa-search-plus"></i>
                             </span>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-        </div>
+                        </button>
+                    </article>
+                @endforeach
+            </div>
+        @endif
     </div>
 </section>
 
-<!-- Modal Structure -->
-<div id="imageModal" class="modal" style="display: none;">
-    <span class="close" onclick="closeModal()">&times;</span>
-    <img class="modal-content" id="modalImg">
-    
-    <!-- Navigation Controls -->
-    <span class="prev" onclick="changeImage(-1)">&#10094;</span>
-    <span class="next" onclick="changeImage(1)">&#10095;</span>
+<div class="modal fade ma-gallery-lightbox" id="ma-gallery-lightbox" tabindex="-1" aria-labelledby="ma-gallery-lightbox-label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <p class="ma-gallery-lightbox__caption mb-0" id="ma-gallery-lightbox-label"></p>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <button type="button" class="ma-gallery-lightbox__nav ma-gallery-lightbox__nav--prev" id="ma-gallery-prev" aria-label="Previous image">
+                    <i class="far fa-angle-left" aria-hidden="true"></i>
+                </button>
+                <figure class="ma-gallery-lightbox__figure">
+                    <img src="" alt="" id="ma-gallery-lightbox-img" class="ma-gallery-lightbox__img">
+                </figure>
+                <button type="button" class="ma-gallery-lightbox__nav ma-gallery-lightbox__nav--next" id="ma-gallery-next" aria-label="Next image">
+                    <i class="far fa-angle-right" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div class="modal-footer">
+                <span id="ma-gallery-counter" class="ma-gallery-lightbox__counter"></span>
+            </div>
+        </div>
+    </div>
 </div>
-
-<!-- JavaScript -->
-<script>
-    let currentIndex = 0;
-    let images = [];
-
-    // Store all images in an array
-    document.addEventListener("DOMContentLoaded", function () {
-        images = Array.from(document.querySelectorAll('.gallery-img')).map(img => img.dataset.src);
-    });
-
-    function openModal(index) {
-        currentIndex = index;
-        let modal = document.getElementById("imageModal");
-        let modalImg = document.getElementById("modalImg");
-        modal.style.display = "flex";
-        modalImg.src = images[currentIndex];
-    }
-
-    function closeModal() {
-        document.getElementById("imageModal").style.display = "none";
-    }
-
-    function changeImage(step) {
-        currentIndex += step;
-        if (currentIndex < 0) currentIndex = images.length - 1;
-        if (currentIndex >= images.length) currentIndex = 0;
-        document.getElementById("modalImg").src = images[currentIndex];
-    }
-
-    // Close modal when clicking outside the image
-    document.getElementById("imageModal").addEventListener("click", function (event) {
-        if (event.target === this) closeModal();
-    });
-
-    // Keyboard Navigation
-    document.addEventListener("keydown", function (event) {
-        if (document.getElementById("imageModal").style.display === "flex") {
-            if (event.key === "ArrowRight") changeImage(1);
-            if (event.key === "ArrowLeft") changeImage(-1);
-            if (event.key === "Escape") closeModal();
-        }
-    });
-</script>

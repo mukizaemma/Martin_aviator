@@ -5,7 +5,7 @@
 @include('frontend.includes.page-header', [
     'title' => 'Book and pay directly',
     'subtitle' => 'Secure online payment is coming soon.',
-    'imageUrl' => null,
+    'pageHeaderSlug' => 'booking',
 ])
 
 <section class="py-100 rpy-70 bg-white rel z-1">

@@ -5,7 +5,7 @@
 @include('frontend.includes.page-header', [
     'title' => $which === 'expedia' ? 'Continue on Expedia' : 'Continue on Booking.com',
     'subtitle' => 'Your request is saved. Complete your reservation on the partner site in the new tab.',
-    'imageUrl' => null,
+    'pageHeaderSlug' => 'booking',
 ])
 
 <section class="py-100 rpy-70 bg-white rel z-1">

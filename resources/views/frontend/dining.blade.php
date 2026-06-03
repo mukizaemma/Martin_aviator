@@ -5,9 +5,7 @@
 @include('frontend.includes.page-header', [
     'title' => 'Bar & Restaurant',
     'subtitle' => 'Browse the menu, add items to your order, and send everything to the hotel on WhatsApp.',
-    'imageUrl' => ! empty($setting->dining_hero_image)
-        ? asset('storage/images/pages/'.$setting->dining_hero_image)
-        : null,
+    'pageHeaderSlug' => 'dining',
 ])
 
 <section class="dining-page py-100 rpy-70 bg-white rel z-1">

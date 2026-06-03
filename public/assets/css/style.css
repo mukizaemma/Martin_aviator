@@ -6791,7 +6791,8 @@ blockquote {
           .gallery-item.style-two .over-content h2 {
             font-size: 35px; } }
 
-            .modal {
+            /* Gallery image lightbox only — do not use bare .modal (breaks Bootstrap) */
+            #imageModal.modal {
               display: flex;
               position: fixed;
               z-index: 1000;
@@ -6805,7 +6806,7 @@ blockquote {
               transition: 0.3s ease-in-out;
           }
           
-          .modal-content {
+          #imageModal .modal-content {
             width: auto;
             max-height: 90vh;
             object-fit: contain;
@@ -6814,7 +6815,7 @@ blockquote {
           }
           
           /* 🔺 Close Button */
-          .close {
+          #imageModal .close {
               position: absolute;
               top: 15px;
               right: 30px;
@@ -6825,12 +6826,12 @@ blockquote {
               transition: 0.3s;
           }
           
-          .close:hover {
+          #imageModal .close:hover {
               color: #ff5757;
           }
           
           /* ⏭️ Next & Prev Buttons */
-          .prev, .next {
+          #imageModal .prev, #imageModal .next {
               position: absolute;
               top: 50%;
               transform: translateY(-50%);
@@ -6844,15 +6845,15 @@ blockquote {
               border-radius: 50%;
           }
           
-          .prev {
+          #imageModal .prev {
               left: 20px;
           }
           
-          .next {
+          #imageModal .next {
               right: 20px;
           }
           
-          .prev:hover, .next:hover {
+          #imageModal .prev:hover, #imageModal .next:hover {
               background: rgba(255, 255, 255, 0.6);
               color: black;
           }
@@ -6872,7 +6873,7 @@ blockquote {
           }
           
           /* 🖼️ Smooth Opening Animation */
-          .modal img {
+          #imageModal.modal img {
               opacity: 0;
               transform: scale(0.8);
               animation: fadeInScale 0.3s forwards;

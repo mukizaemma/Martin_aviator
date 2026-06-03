@@ -5,7 +5,7 @@
 @include('frontend.includes.page-header', [
     'title' => 'Open your email app',
     'subtitle' => 'Tap the button below to send your saved booking request to the hotel.',
-    'imageUrl' => null,
+    'pageHeaderSlug' => 'booking',
 ])
 
 <section class="py-100 rpy-70 bg-white rel z-1">

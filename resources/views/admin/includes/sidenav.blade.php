@@ -6,6 +6,10 @@
                 <div class="sb-nav-link-icon"><i class="fas fa-sliders-h"></i></div>
                 Site settings
             </a>
+            <a class="nav-link" href="{{ route('pageHeaders') }}">
+                <div class="sb-nav-link-icon"><i class="fas fa-panorama"></i></div>
+                Page header images
+            </a>
             <a class="nav-link" href="{{route('about')}}">
                 <div class="sb-nav-link-icon"><i class="fas fa-info-circle"></i></div>
                 About content
@@ -58,9 +62,13 @@
             </a>
             <hr> --}}
 
-            <a class="nav-link" href="{{route('bookings')}}">
+            <a class="nav-link" href="{{ route('guestReservations') }}">
                 <div class="sb-nav-link-icon"><i class="far fa-heart"></i></div>
                 Reservations
+            </a>
+            <a class="nav-link" href="{{ route('bookings') }}">
+                <div class="sb-nav-link-icon"><i class="fas fa-list"></i></div>
+                Legacy bookings
             </a>
             <a class="nav-link" href="{{ route('guestInsights') }}">
                 <div class="sb-nav-link-icon"><i class="fas fa-chart-line"></i></div>

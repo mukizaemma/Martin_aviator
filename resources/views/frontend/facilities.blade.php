@@ -4,9 +4,7 @@
 
 @include('frontend.includes.page-header', [
     'title' => 'Hotel facilities',
-    'imageUrl' => ! empty($setting->facilities_hero_image)
-        ? asset('storage/images/pages/'.$setting->facilities_hero_image)
-        : null,
+    'pageHeaderSlug' => 'facilities',
 ])
 
 @if (! empty($setting->facilities_intro))

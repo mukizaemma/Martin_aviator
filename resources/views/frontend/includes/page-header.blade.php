@@ -1,12 +1,11 @@
 {{--
     Shared inner-page header: optional hero background, otherwise solid bar (same pattern as Dining fallback).
-    Pass: title (required), optional subtitle, optional imageUrl (full URL from asset()).
-    Does not introduce new settings fields — callers pass URLs built from existing About/Setting/Facility/etc.
+    Pass: title (required), optional subtitle, optional imageUrl, or pageHeaderSlug for admin-managed banners.
 --}}
 @php
     $__title = $title ?? ($pageTitle ?? 'Page');
     $__subtitle = $subtitle ?? null;
-    $__img = $imageUrl ?? null;
+    $__img = $imageUrl ?? (isset($pageHeaderSlug) ? page_header_url($pageHeaderSlug) : null);
     $__highlights = $highlights ?? [];
 @endphp
 @if ($__img)
@@ -32,13 +31,6 @@
             @endif
         </div>
     </div>
-    <div class="bg-lines">
-        <span></span><span></span>
-        <span></span><span></span>
-        <span></span><span></span>
-        <span></span><span></span>
-        <span></span><span></span>
-    </div>
 </section>
 @else
 <section class="page-banner-area page-banner-area--edge page-banner-area--solid pt-100 rpt-70 pb-100 rpb-70 rel z-1 bgc-black text-center text-white">
@@ -61,13 +53,6 @@
                 </div>
             @endif
         </div>
-    </div>
-    <div class="bg-lines">
-        <span></span><span></span>
-        <span></span><span></span>
-        <span></span><span></span>
-        <span></span><span></span>
-        <span></span><span></span>
     </div>
 </section>
 @endif

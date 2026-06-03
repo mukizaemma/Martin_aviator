@@ -4,15 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Room;
 use App\Models\SiteAnalyticsEvent;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\View\View;
 
 class DirectPayPlaceholderController extends Controller
 {
-    use Concerns\RendersSpaFragment;
-
-    public function __invoke(Request $request): View|Response
+    public function __invoke(Request $request): RedirectResponse
     {
         SiteAnalyticsEvent::create([
             'event_key' => 'direct_pay_page_view',
@@ -20,14 +17,15 @@ class DirectPayPlaceholderController extends Controller
             'session_id' => substr(sha1($request->session()->getId()), 0, 40),
         ]);
 
-        $room = null;
+        $params = [];
         if ($request->filled('room')) {
             $room = Room::where('slug', $request->query('room'))->first();
             if ($room) {
                 $request->session()->put('booking_room_slug', $room->slug);
+                $params['room'] = $room->slug;
             }
         }
 
-        return $this->spaView('frontend.pay-dpo-placeholder', compact('room'), 'Book and pay');
+        return redirect()->route('room.booking', $params);
     }
 }

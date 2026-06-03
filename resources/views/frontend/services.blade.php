@@ -5,7 +5,7 @@
 @include('frontend.includes.page-header', [
     'title' => 'Our services',
     'subtitle' => null,
-    'imageUrl' => null,
+    'pageHeaderSlug' => 'services',
 ])
 
     @include('frontend.layouts.services')

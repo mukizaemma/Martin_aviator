@@ -30,7 +30,7 @@
         </ul>
         <div class="ma-room-card__actions d-flex flex-wrap gap-2">
             <a class="theme-btn style-three" href="{{ route('singleRoom', ['slug' => $room->slug]) }}" data-ma-room-slug="{{ $room->slug }}">View Details <i class="fal fa-angle-right"></i></a>
-            <a class="theme-btn" href="{{ route('pay.dpo', ['room' => $room->slug]) }}" data-ma-room-slug="{{ $room->slug }}" data-no-spa>Book Now <i class="fal fa-angle-right"></i></a>
+            <a class="theme-btn" href="{{ route('room.booking', ['room' => $room->slug]) }}" data-ma-room-slug="{{ $room->slug }}" data-no-spa>Book Now <i class="fal fa-angle-right"></i></a>
         </div>
     </div>
 </div>

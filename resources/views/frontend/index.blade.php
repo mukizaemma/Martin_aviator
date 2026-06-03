@@ -137,7 +137,7 @@
                                         <a href="{{ route('singleRoom', ['slug' => $room->slug]) }}" data-ma-room-slug="{{ $room->slug }}" class="theme-btn style-three home-room-card__btn flex-grow-1 d-inline-flex justify-content-center align-items-center">
                                             View Details <i class="far fa-angle-right"></i>
                                         </a>
-                                        <a href="{{ route('pay.dpo', ['room' => $room->slug]) }}" data-ma-room-slug="{{ $room->slug }}" class="theme-btn home-room-card__btn flex-grow-1 d-inline-flex justify-content-center align-items-center">
+                                        <a href="{{ route('room.booking', ['room' => $room->slug]) }}" data-ma-room-slug="{{ $room->slug }}" data-no-spa class="theme-btn home-room-card__btn flex-grow-1 d-inline-flex justify-content-center align-items-center">
                                             Book Now <i class="far fa-angle-right"></i>
                                         </a>
                                     </div>
@@ -153,13 +153,6 @@
                         </a>
                     </div>
                 @endif
-            </div>
-            <div class="bg-lines">
-               <span></span><span></span>
-               <span></span><span></span>
-               <span></span><span></span>
-               <span></span><span></span>
-               <span></span><span></span>
             </div>
         </section>
         <!-- Room Area end -->

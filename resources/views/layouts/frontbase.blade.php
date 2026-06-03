@@ -167,7 +167,9 @@
         @endfragment
     </div>
 
-        @include('frontend.includes.amenities-band')
+        @unless (request()->routeIs('room.booking', 'room.booking.confirmation', 'room.booking.email', 'room.booking.ota') || View::hasSection('hide_amenities_band'))
+            @include('frontend.includes.amenities-band')
+        @endunless
        
         <!-- footer area start -->
         <footer class="main-footer bgc-black pt-100 rel z-1 ma-footer-gold">
@@ -230,17 +232,12 @@
                    </div>
                 </div>
             </div>
-            <div class="bg-lines">
-               <span></span><span></span>
-               <span></span><span></span>
-               <span></span><span></span>
-               <span></span><span></span>
-               <span></span><span></span>
-            </div>
         </footer>
         <!-- footer area end -->
         
         
+        @include('frontend.includes.whatsapp-float')
+
         <!-- Scroll Top Button -->
         <button class="scroll-top scroll-to-target" data-target="html"><span class="fas fa-angle-double-up"></span></button>
 
@@ -268,6 +265,7 @@
     <script src="{{ asset('assets/js/booking-room-persist.js') }}" defer></script>
     <script src="{{ asset('assets/js/parallax-bg.js') }}" defer></script>
     <script src="{{ asset('assets/js/ma-spa-nav.js') }}" defer></script>
+    <script src="{{ asset('assets/js/gallery-page.js') }}" defer></script>
     @stack('frontend-scripts')
 
 </body>

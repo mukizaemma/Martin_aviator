@@ -5,9 +5,7 @@
 @include('frontend.includes.page-header', [
     'title' => 'Gallery',
     'subtitle' => null,
-    'imageUrl' => isset($images) && $images->count()
-        ? asset('storage/images/gallery/'.$images->first()->image)
-        : null,
+    'pageHeaderSlug' => 'gallery',
 ])
 
         <!-- Gallery Area start -->

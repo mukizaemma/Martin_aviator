@@ -45,11 +45,6 @@ class DiningController extends Controller
         DB::transaction(function () use ($request, $setting) {
             $setting->dining_intro = $request->input('dining_intro');
 
-            if ($request->hasFile('dining_hero_image') && $request->file('dining_hero_image')->isValid()) {
-                $path = $request->file('dining_hero_image')->store('public/images/pages');
-                $setting->dining_hero_image = basename($path);
-            }
-
             $setting->save();
         });
 

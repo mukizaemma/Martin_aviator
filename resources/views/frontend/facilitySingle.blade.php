@@ -82,13 +82,6 @@
             @endforeach
         </div>
     </div>
-    <div class="bg-lines for-bg-white">
-        <span></span><span></span>
-        <span></span><span></span>
-        <span></span><span></span>
-        <span></span><span></span>
-        <span></span><span></span>
-    </div>
 </section>
 
 @endsection

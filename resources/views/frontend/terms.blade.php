@@ -5,9 +5,7 @@
 @include('frontend.includes.page-header', [
     'title' => 'Terms & conditions',
     'subtitle' => 'Booking policies and payment information',
-    'imageUrl' => ! empty($about->middleImage ?? null)
-        ? asset('storage/images/gallery/' . ltrim($about->middleImage, '/'))
-        : null,
+    'pageHeaderSlug' => 'terms',
 ])
 
         <!-- Terms Area start -->

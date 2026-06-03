@@ -5,9 +5,7 @@
 @include('frontend.includes.page-header', [
     'title' => 'About us',
     'subtitle' => null,
-    'imageUrl' => ! empty($about->aboutImage ?? null)
-        ? asset('storage/images/gallery/' . ltrim($about->aboutImage, '/'))
-        : null,
+    'pageHeaderSlug' => 'about',
 ])
 
         <!-- Who We Ar Area start -->
@@ -31,13 +29,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="bg-lines for-bg-white">
-               <span></span><span></span>
-               <span></span><span></span>
-               <span></span><span></span>
-               <span></span><span></span>
-               <span></span><span></span>
             </div>
         </section>
         <!-- Who We Ar Area end -->

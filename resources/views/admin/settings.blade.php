@@ -272,16 +272,8 @@
 
                                         <div class="tab-pane fade" id="tab-facilities-page" role="tabpanel">
                                             <p class="text-muted small mb-4">Top section of the public <strong>Facilities</strong> page (before the facility cards).</p>
+                                            <p class="text-muted small">The facilities page banner is managed under <a href="{{ route('pageHeaders') }}">Page header images</a> (Facilities).</p>
                                             <div class="row g-4 mb-4">
-                                                <div class="col-md-5">
-                                                    <label class="form-label">Hero image</label>
-                                                    @if (! empty($data->facilities_hero_image))
-                                                        <div class="mb-2 border rounded p-2 bg-light">
-                                                            <img src="{{ asset('storage/images/pages/' . $data->facilities_hero_image) }}" alt="" class="img-fluid rounded">
-                                                        </div>
-                                                    @endif
-                                                    <input type="file" class="form-control" name="facilities_hero_image" accept="image/*">
-                                                </div>
                                                 <div class="col-md-12">
                                                     <label class="form-label" for="setting_facilities_intro">Introduction</label>
                                                     <textarea id="setting_facilities_intro" name="facilities_intro" class="form-control" rows="10">{{ old('facilities_intro', $data->facilities_intro ?? '') }}</textarea>

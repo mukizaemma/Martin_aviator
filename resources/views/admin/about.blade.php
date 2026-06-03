@@ -53,11 +53,10 @@
                                         </div>
 
                                         <div class="row mt-4">
+                                            <p class="text-muted small">Page banner images (About, Contact, Rooms, etc.) are managed under <a href="{{ route('pageHeaders') }}">Page header images</a>.</p>
                                             @php
                                                 $imageSections = [
-                                                    ['label' => 'Why Choose Us Image', 'field' => 'aboutImage'],
-                                                    ['label' => 'Contact Us Header Image', 'field' => 'middleImage'],
-                                                    ['label' => 'Rooms Page Header Image', 'field' => 'chooseusImage'],
+                                                    ['label' => 'Home welcome section image', 'field' => 'aboutImage'],
                                                 ];
                                             @endphp
                                         

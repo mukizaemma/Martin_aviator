@@ -90,13 +90,6 @@
             </div>
 
         </div>
-        <div class="bg-lines for-bg-white">
-           <span></span><span></span>
-           <span></span><span></span>
-           <span></span><span></span>
-           <span></span><span></span>
-           <span></span><span></span>
-        </div>
     </section>
     <!-- Room Details End -->
 
@@ -105,8 +98,7 @@
             <div class="col-lg-8">
                 <h3 class="mb-3">Book this room</h3>
                 <p class="text-muted mb-4">Pay directly when available, or choose WhatsApp, email, or a partner site — all options are on our booking page.</p>
-                <a href="{{ route('pay.dpo', ['room' => $room->slug]) }}" data-ma-room-slug="{{ $room->slug }}" class="theme-btn">Book Now <i class="far fa-angle-right ms-2"></i></a>
-                <a href="{{ route('room.booking', ['room' => $room->slug]) }}" data-ma-room-slug="{{ $room->slug }}" class="theme-btn style-three ms-2 mt-2 mt-sm-0 d-inline-block">Other ways to book</a>
+                <a href="{{ route('room.booking', ['room' => $room->slug]) }}" data-ma-room-slug="{{ $room->slug }}" data-no-spa class="theme-btn">Book Now <i class="far fa-angle-right ms-2"></i></a>
                 <a href="{{ route('rooms') }}" class="theme-btn style-three ms-2 mt-2 mt-sm-0 d-inline-block">All accommodation</a>
             </div>
         </div>

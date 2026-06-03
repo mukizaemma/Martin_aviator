@@ -5,7 +5,7 @@
 @include('frontend.includes.page-header', [
     'title' => $post->title,
     'subtitle' => optional($post->published_at)->format('d M Y'),
-    'imageUrl' => null,
+    'pageHeaderSlug' => 'blogs',
 ])
 
 <section class="blog-details-area py-100 rpy-80 rel z-1">
