@@ -25,11 +25,8 @@ class FacilitiesController extends Controller
         // dd($request->all());
 
         $fileName = '';
-        if($request->hasFile('image')){
-            $file = $request->file('image');
-
-            $path = $file->store('public/images/facilities');
-            $fileName = basename($path);
+        if ($request->hasFile('image')) {
+            $fileName = $this->storeOptimizedImage($request->file('image'), 'public/images/facilities', 'facility') ?? '';
         }
 
         // Generate the slug
@@ -61,16 +58,12 @@ class FacilitiesController extends Controller
         $post = Facility::findOrFail($id);
 
         // Update image if a new one is uploaded
-        if($request->hasFile('image')){
-            $file = $request->file('image');
-
-            $path = $file->store('public/images/facilities');
-            $fileName = basename($path);
-
-            // Delete the old image file
-            Storage::delete('public/images/facilities/' . $post->image);
-
-            $post->image = $fileName;
+        if ($request->hasFile('image')) {
+            $fileName = $this->storeOptimizedImage($request->file('image'), 'public/images/facilities', 'facility');
+            if ($fileName) {
+                Storage::delete('public/images/facilities/'.$post->image);
+                $post->image = $fileName;
+            }
         }
 
         // Update other fields
@@ -129,10 +122,10 @@ class FacilitiesController extends Controller
 
         // Uploading image
         if ($request->hasFile('image')) {
-            $dir = 'public/images/facilities';
-            $path = $request->file('image')->store($dir);
-            $fileName = str_replace($dir, '', $path);
-            $data->image = $fileName;
+            $fileName = $this->storeOptimizedImage($request->file('image'), 'public/images/facilities', 'facility');
+            if ($fileName) {
+                $data->image = $fileName;
+            }
         }
 
         $stored = $data->save();

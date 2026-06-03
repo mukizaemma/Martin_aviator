@@ -25,11 +25,8 @@ class ServicesController extends Controller
         // dd($request->all());
 
         $fileName = '';
-        if($request->hasFile('image')){
-            $file = $request->file('image');
-
-            $path = $file->store('public/images/services');
-            $fileName = basename($path);
+        if ($request->hasFile('image')) {
+            $fileName = $this->storeOptimizedImage($request->file('image'), 'public/images/services', 'service') ?? '';
         }
 
         // Generate the slug
@@ -60,16 +57,12 @@ class ServicesController extends Controller
         $post = Service::findOrFail($id);
 
         // Update image if a new one is uploaded
-        if($request->hasFile('image')){
-            $file = $request->file('image');
-
-            $path = $file->store('public/images/services');
-            $fileName = basename($path);
-
-            // Delete the old image file
-            Storage::delete('public/images/services/' . $post->image);
-
-            $post->image = $fileName;
+        if ($request->hasFile('image')) {
+            $fileName = $this->storeOptimizedImage($request->file('image'), 'public/images/services', 'service');
+            if ($fileName) {
+                Storage::delete('public/images/services/'.$post->image);
+                $post->image = $fileName;
+            }
         }
 
         // Update other fields
@@ -128,10 +121,10 @@ class ServicesController extends Controller
 
         // Uploading image
         if ($request->hasFile('image')) {
-            $dir = 'public/images/services';
-            $path = $request->file('image')->store($dir);
-            $fileName = str_replace($dir, '', $path);
-            $data->image = $fileName;
+            $fileName = $this->storeOptimizedImage($request->file('image'), 'public/images/services', 'service');
+            if ($fileName) {
+                $data->image = $fileName;
+            }
         }
 
         $stored = $data->save();

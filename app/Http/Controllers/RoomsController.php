@@ -66,10 +66,7 @@ class RoomsController extends Controller
 
         $fileName = '';
         if ($request->hasFile('image')) {
-            $file = $request->file('image');
-
-            $path = $file->store('public/images/rooms');
-            $fileName = basename($path);
+            $fileName = $this->storeOptimizedImage($request->file('image'), 'public/images/rooms', 'room') ?? '';
         }
 
         // Generate the slug
@@ -117,15 +114,11 @@ class RoomsController extends Controller
 
         // Update image if a new one is uploaded
         if ($request->hasFile('image')) {
-            $file = $request->file('image');
-
-            $path = $file->store('public/images/rooms');
-            $fileName = basename($path);
-
-            // Delete the old image file
-            Storage::delete('public/images/rooms/'.$room->image);
-
-            $room->image = $fileName;
+            $fileName = $this->storeOptimizedImage($request->file('image'), 'public/images/rooms', 'room');
+            if ($fileName) {
+                Storage::delete('public/images/rooms/'.$room->image);
+                $room->image = $fileName;
+            }
         }
 
         // Update other fields
@@ -194,10 +187,10 @@ class RoomsController extends Controller
         $data = new roomImage;
         $data->room_id = $pid;
         if ($request->hasFile('image')) {
-            $dir = 'public/images/rooms';
-            $path = $request->file('image')->store($dir);
-            $fileName = str_replace($dir, '', $path);
-            $data->image = $fileName;
+            $fileName = $this->storeOptimizedImage($request->file('image'), 'public/images/rooms', 'room');
+            if ($fileName) {
+                $data->image = $fileName;
+            }
         }
 
         $stored = $data->save();

@@ -44,7 +44,13 @@
         <section class="hero-slider-two hero-slider-two--edge rel z-1">
             <div class="slider-two-active">
                 @foreach ($slides as $slide )
-                <div class="slider-item-two parallax-bg" style="background-image: url('{{asset('storage/images/slides').$slide->image}}');">
+                @php $slideBg = asset('storage/images/slides/'.$slide->image); @endphp
+                <div class="slider-item-two parallax-bg"
+                    @if ($loop->first)
+                        style="background-image: url('{{ $slideBg }}');"
+                    @else
+                        data-defer-bg="{{ $slideBg }}"
+                    @endif>
                     <div class="container">
                         <div class="slider-content-two">
                             <h1>{{ $slide->heading }}</h1>

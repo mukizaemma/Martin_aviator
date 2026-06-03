@@ -63,15 +63,10 @@ class SettingController extends Controller
             $data->facilities_intro = $request->input('facilities_intro');
 
             if ($request->hasFile('logo') && request('logo') != '') {
-                $dir = 'public/images';
-
-                if (File::exists($dir)) {
-                    unlink($dir);
+                $fileName = $this->storeOptimizedImage($request->file('logo'), 'public/images', 'logo');
+                if ($fileName) {
+                    $data->logo = $fileName;
                 }
-                $path = $request->file('logo')->store($dir);
-                $fileName = str_replace($dir, '', $path);
-
-                $data->logo = $fileName;
             }
 
             // Flexible Stay section
@@ -91,8 +86,10 @@ class SettingController extends Controller
             $data->flexible_stay_card3_icon = $request->input('flexible_stay_card3_icon');
 
             if ($request->hasFile('flexible_stay_bg_image') && request('flexible_stay_bg_image') != '') {
-                $path = $request->file('flexible_stay_bg_image')->store('public/images/pages');
-                $data->flexible_stay_bg_image = basename($path);
+                $fileName = $this->storeOptimizedImage($request->file('flexible_stay_bg_image'), 'public/images/pages', 'page');
+                if ($fileName) {
+                    $data->flexible_stay_bg_image = $fileName;
+                }
             }
 
             $data->save();
@@ -135,39 +132,24 @@ class SettingController extends Controller
         $data->background = $request->input('background');
 
         if ($request->hasFile('aboutImage') && request('aboutImage') != '') {
-            $dir = 'public/images/gallery';
-
-            if (File::exists($dir)) {
-                unlink($dir);
+            $fileName = $this->storeOptimizedImage($request->file('aboutImage'), 'public/images/gallery', 'gallery');
+            if ($fileName) {
+                $data->aboutImage = $fileName;
             }
-            $path = $request->file('aboutImage')->store($dir);
-            $fileName = str_replace($dir, '', $path);
-
-            $data->aboutImage = $fileName;
         }
 
         if ($request->hasFile('middleImage') && request('middleImage') != '') {
-            $dir = 'public/images/gallery';
-
-            if (File::exists($dir)) {
-                unlink($dir);
+            $fileName = $this->storeOptimizedImage($request->file('middleImage'), 'public/images/gallery', 'gallery');
+            if ($fileName) {
+                $data->middleImage = $fileName;
             }
-            $path = $request->file('middleImage')->store($dir);
-            $fileName = str_replace($dir, '', $path);
-
-            $data->middleImage = $fileName;
         }
 
         if ($request->hasFile('chooseusImage') && request('chooseusImage') != '') {
-            $dir = 'public/images/gallery';
-
-            if (File::exists($dir)) {
-                unlink($dir);
+            $fileName = $this->storeOptimizedImage($request->file('chooseusImage'), 'public/images/gallery', 'gallery');
+            if ($fileName) {
+                $data->chooseusImage = $fileName;
             }
-            $path = $request->file('chooseusImage')->store($dir);
-            $fileName = str_replace($dir, '', $path);
-
-            $data->chooseusImage = $fileName;
         }
 
         $data->update();

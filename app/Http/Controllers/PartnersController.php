@@ -24,11 +24,8 @@ class PartnersController extends Controller
         // dd($request->all());
 
         $fileName = '';
-        if($request->hasFile('image')){
-            $file = $request->file('image');
-
-            $path = $file->store('public/images/partners');
-            $fileName = basename($path);
+        if ($request->hasFile('image')) {
+            $fileName = $this->storeOptimizedImage($request->file('image'), 'public/images/partners', 'partner') ?? '';
         }
 
         // Generate the slug
@@ -60,16 +57,12 @@ class PartnersController extends Controller
         $partner = partner::findOrFail($id);
 
         // Update image if a new one is uploaded
-        if($request->hasFile('image')){
-            $file = $request->file('image');
-
-            $path = $file->store('public/images/partners');
-            $fileName = basename($path);
-
-            // Delete the old image file
-            Storage::delete('public/images/partners/' . $partner->image);
-
-            $partner->image = $fileName;
+        if ($request->hasFile('image')) {
+            $fileName = $this->storeOptimizedImage($request->file('image'), 'public/images/partners', 'partner');
+            if ($fileName) {
+                Storage::delete('public/images/partners/'.$partner->image);
+                $partner->image = $fileName;
+            }
         }
 
         // Update other fields

@@ -7,10 +7,11 @@
         @foreach ($gallery as $index => $image)
         <div class="gallery-item wow fadeInUp delay-0-2s">
             <div class="image">
-                <img src="{{ asset('storage/images/gallery') . $image->image }}" 
+                <img src="{{ asset('storage/images/gallery/'.$image->image) }}" 
                      alt="Gallery"
-                     loading="lazy"
+                     loading="{{ $index < 2 ? 'eager' : 'lazy' }}"
                      decoding="async"
+                     @if ($index === 0) fetchpriority="high" @endif
                      style="height: 300px; object-fit:cover; cursor:pointer;"
                      data-index="{{ $index }}"
                      data-src="{{ asset('storage/images/gallery') . $image->image }}"

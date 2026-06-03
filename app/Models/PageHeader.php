@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Services\ImageUploadOptimizer;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -74,8 +75,8 @@ class PageHeader extends Model
             $this->deleteStoredImage();
         }
 
-        $path = $file->store('public/images/pages');
-        $this->image = 'pages/'.basename($path);
+        $filename = app(ImageUploadOptimizer::class)->store($file, 'public/images/pages', 'page');
+        $this->image = 'pages/'.$filename;
         $this->save();
     }
 

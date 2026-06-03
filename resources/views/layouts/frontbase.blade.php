@@ -266,6 +266,7 @@
     <script src="{{ asset('assets/js/parallax-bg.js') }}" defer></script>
     <script src="{{ asset('assets/js/ma-spa-nav.js') }}" defer></script>
     <script src="{{ asset('assets/js/gallery-page.js') }}" defer></script>
+    <script src="{{ asset('assets/js/lazy-media.js') }}" defer></script>
     @stack('frontend-scripts')
 
 </body>

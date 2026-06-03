@@ -26,10 +26,10 @@ class SlidesController extends Controller
 
         // Uploading image
         if ($request->hasFile('image')) {
-            $dir = 'public/images/slides';
-            $path = $request->file('image')->store($dir);
-            $fileName = str_replace($dir, '', $path);
-            $data->image = $fileName;
+            $fileName = $this->storeOptimizedImage($request->file('image'), 'public/images/slides', 'slide');
+            if ($fileName) {
+                $data->image = $fileName;
+            }
         }
 
         $stored = $data->save();
@@ -58,15 +58,13 @@ class SlidesController extends Controller
         }
 
         if ($request->hasFile('image') && request('image') != '') {
-            $dir = 'public/images/slides';
-
-            if (File::exists($dir)) {
-                unlink($dir);
+            $fileName = $this->storeOptimizedImage($request->file('image'), 'public/images/slides', 'slide');
+            if ($fileName) {
+                if ($data->image) {
+                    Storage::delete('public/images/slides/'.$data->image);
+                }
+                $data->image = $fileName;
             }
-            $path = $request->file('image')->store($dir);
-            $fileName = str_replace($dir, '', $path);
-
-            $data->image = $fileName;
         }
 
         $data->update();
@@ -78,7 +76,9 @@ class SlidesController extends Controller
     {
         $image = Slide::findOrFail($id);
         // delete the image file
-        Storage::delete('public/images/gallery/'.$image);
+        if ($image->image) {
+            Storage::delete('public/images/slides/'.$image->image);
+        }
         $image->delete();
         return redirect()->back()->with('warning', 'Item has been deleted');
     }

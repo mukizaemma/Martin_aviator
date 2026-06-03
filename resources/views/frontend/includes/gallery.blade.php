@@ -26,8 +26,9 @@
                             aria-label="View {{ $image->caption ?? $image->category }}">
                             <img src="{{ $src }}"
                                  alt="{{ $image->caption ?? $image->category }}"
-                                 loading="lazy"
+                                 loading="{{ $loop->index < 6 ? 'eager' : 'lazy' }}"
                                  decoding="async"
+                                 @if ($loop->index < 3) fetchpriority="high" @endif
                                  width="640"
                                  height="480">
                             <span class="ma-gallery-card__overlay" aria-hidden="true">

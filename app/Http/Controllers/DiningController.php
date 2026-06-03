@@ -6,6 +6,7 @@ use App\Models\DiningGalleryImage;
 use App\Models\DiningMenuItem;
 use App\Models\MenuCategory;
 use App\Models\Setting;
+use App\Services\ImageUploadOptimizer;
 use App\Services\OpenAiImageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -60,8 +61,7 @@ class DiningController extends Controller
 
         $imageName = null;
         if ($request->hasFile('cover_image')) {
-            $path = $request->file('cover_image')->store('images/menu-categories', 'public');
-            $imageName = basename($path);
+            $imageName = $this->storeOptimizedImage($request->file('cover_image'), 'images/menu-categories', 'dining', 'public');
         }
 
         $maxSort = (int) MenuCategory::max('sort_order');
@@ -88,8 +88,10 @@ class DiningController extends Controller
             if ($category->cover_image) {
                 Storage::disk('public')->delete('images/menu-categories/'.$category->cover_image);
             }
-            $path = $request->file('cover_image')->store('images/menu-categories', 'public');
-            $category->cover_image = basename($path);
+            $fileName = $this->storeOptimizedImage($request->file('cover_image'), 'images/menu-categories', 'dining', 'public');
+            if ($fileName) {
+                $category->cover_image = $fileName;
+            }
         }
 
         $category->save();
@@ -152,11 +154,16 @@ class DiningController extends Controller
             if (strlen($bin) < 500) {
                 return response()->json(['message' => 'Image download failed.'], 422);
             }
-            $name = 'cat-cover-'.Str::random(12).'.png';
-            Storage::disk('public')->put('images/menu-categories/'.$name, $bin);
             if ($category->cover_image) {
                 Storage::disk('public')->delete('images/menu-categories/'.$category->cover_image);
             }
+            $name = app(ImageUploadOptimizer::class)->storeBinary(
+                $bin,
+                'images/menu-categories',
+                'dining',
+                'public',
+                'png'
+            );
             $category->cover_image = $name;
             $category->save();
         } catch (\Throwable $e) {
@@ -180,8 +187,7 @@ class DiningController extends Controller
 
         $imageName = null;
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('public/images/dining');
-            $imageName = basename($path);
+            $imageName = $this->storeOptimizedImage($request->file('image'), 'public/images/dining', 'dining');
         }
 
         $maxSort = (int) DiningMenuItem::max('sort_order');
@@ -223,8 +229,10 @@ class DiningController extends Controller
             if ($item->image) {
                 Storage::delete('public/images/dining/'.$item->image);
             }
-            $path = $request->file('image')->store('public/images/dining');
-            $item->image = basename($path);
+            $fileName = $this->storeOptimizedImage($request->file('image'), 'public/images/dining', 'dining');
+            if ($fileName) {
+                $item->image = $fileName;
+            }
         }
 
         $item->save();
@@ -249,11 +257,14 @@ class DiningController extends Controller
             'caption' => 'nullable|string|max:255',
         ]);
 
-        $path = $request->file('image')->store('public/images/dining-gallery');
+        $fileName = $this->storeOptimizedImage($request->file('image'), 'public/images/dining-gallery', 'gallery');
+        if (! $fileName) {
+            return redirect()->route('diningMenu')->with('error', 'Could not save image.');
+        }
         $maxSort = (int) DiningGalleryImage::max('sort_order');
 
         DiningGalleryImage::create([
-            'image' => basename($path),
+            'image' => $fileName,
             'caption' => $request->caption,
             'sort_order' => $maxSort + 1,
         ]);

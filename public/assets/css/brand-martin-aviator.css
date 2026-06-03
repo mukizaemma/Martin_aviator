@@ -2465,6 +2465,12 @@ body:not(.modal-open) .modal-backdrop {
   font-size: 0.8rem;
 }
 
+/* Home slider: placeholder until deferred slide backgrounds load */
+.slider-item-two[data-defer-bg]:not([style*="background-image"]) {
+  min-height: min(72vh, 640px);
+  background-color: #1a1918;
+}
+
 /* Gallery page — 3-column grid + lightbox */
 .ma-gallery-grid {
   display: grid;

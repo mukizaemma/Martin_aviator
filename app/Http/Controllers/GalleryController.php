@@ -32,10 +32,10 @@ class GalleryController extends Controller
 
         // Uploading image
         if ($request->hasFile('image')) {
-            $dir = 'public/images/gallery';
-            $path = $request->file('image')->store($dir);
-            $fileName = str_replace($dir, '', $path);
-            $data->image = $fileName;
+            $fileName = $this->storeOptimizedImage($request->file('image'), 'public/images/gallery', 'gallery');
+            if ($fileName) {
+                $data->image = $fileName;
+            }
         }
 
         $stored = $data->save();
@@ -64,15 +64,13 @@ class GalleryController extends Controller
         }
 
         if ($request->hasFile('image') && request('image') != '') {
-            $dir = 'public/images/gallery';
-
-            if (File::exists($dir)) {
-                unlink($dir);
+            $fileName = $this->storeOptimizedImage($request->file('image'), 'public/images/gallery', 'gallery');
+            if ($fileName) {
+                if ($data->image) {
+                    Storage::delete('public/images/gallery/'.$data->image);
+                }
+                $data->image = $fileName;
             }
-            $path = $request->file('image')->store($dir);
-            $fileName = str_replace($dir, '', $path);
-
-            $data->image = $fileName;
         }
 
         $data->update();
@@ -84,7 +82,9 @@ class GalleryController extends Controller
     {
         $image = Image::findOrFail($id);
         // delete the image file
-        Storage::delete('public/images/gallery/'.$image);
+        if ($image->image) {
+            Storage::delete('public/images/gallery/'.$image->image);
+        }
         $image->delete();
         return redirect()->back()->with('warning', 'Item has been deleted');
     }
