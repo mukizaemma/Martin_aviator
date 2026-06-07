@@ -161,7 +161,7 @@
         <!--Form Back Drop-->
         <div class="form-back-drop"></div>
 
-    <div class="container-fluid" id="spa-content" data-spa-container>
+    <div id="spa-content" data-spa-container>
         @fragment('spa-main')
         @yield('content')
         @endfragment

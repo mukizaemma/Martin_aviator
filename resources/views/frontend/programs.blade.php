@@ -4,7 +4,7 @@
 
 
     <!-- Page Header Start -->
-    <div class="container-fluid page-header parallax-bg py-5 mb-5" style="background-image: url('{{asset('assets')}}/img/1.jpg'); background-size: 100% 100%; background-position: center; object-fit:cover;">
+    <div class="page-header parallax-bg py-5 mb-5" style="background-image: url('{{asset('assets')}}/img/1.jpg'); background-size: cover; background-position: center;">
         <div class="container py-5">
             <h1 class="display-3 text-black mb-3 animated slideInDown text-center">Our Programs</h1>
         </div>

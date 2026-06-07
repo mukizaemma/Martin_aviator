@@ -78,6 +78,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     Route::get('/guest-insights', [GuestInsightsController::class, 'index'])->name('guestInsights');
     Route::get('/guest-reservations', [GuestReservationController::class, 'index'])->name('guestReservations');
+    Route::get('/guest-reservations/print', [GuestReservationController::class, 'print'])->name('guestReservations.print');
+    Route::patch('/guest-reservations/{reservation}/status', [GuestReservationController::class, 'updateStatus'])->name('guestReservations.updateStatus');
+    Route::delete('/guest-reservations/{reservation}', [GuestReservationController::class, 'destroy'])->name('guestReservations.destroy');
 
     Route::get('/setting', [SettingController::class, 'setting'])->name('setting');
     Route::post('/saveSetting', [SettingController::class, 'saveSetting'])->name('saveSetting');
