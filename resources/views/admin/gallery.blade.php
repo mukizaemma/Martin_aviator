@@ -51,7 +51,7 @@
                                 @foreach($images as $rs)
                                 <tr>
                                    
-                                    <td><img src="{{asset('storage/images/gallery').$rs->image}}" alt="" width="150px"></td>
+                                    <td><img src="{{ asset('storage/images/gallery/'.$rs->image) }}" alt="" width="150px"></td>
                                     <td>{{$rs->category ?? ''}}</td>
                                     <td>                                                
                                         <div class="btn-btn-group ">
